@@ -156,7 +156,7 @@ function obtenerMovimientosValidos(posicion) {
     return movimientosValidos;
 }
 
-// --- FUNCIÓN: MANEJAR CLIC EN UNA POSICIÓN DEL TABLERO ---
+//  FUNCIÓN: MANEJAR CLIC EN UNA POSICIÓN DEL TABLERO 
 function manejarClic(posicion) {
     // Si no hay ficha seleccionada todavía...
     if (fichaSeleccionada === null) {
@@ -220,7 +220,8 @@ function ejecutarMovimiento(origen, destino) {
 
     const intermedia = movimientoEncontrado[0];
 
-    // Guardar en historial para poder DESHACER (array como pila)
+    // Guardar en historial para poder deshacer
+    //  (array como pila)
     historialMovimientos.push({
         origen: origen,
         intermedia: intermedia,
@@ -249,3 +250,153 @@ function ejecutarMovimiento(origen, destino) {
     // Verificar si el juego terminó
     verificarFinJuego();
 }
+
+// --- FUNCIÓN: VERIFICAR FIN DEL JUEGO ---
+function verificarFinJuego() {
+    // Comprobar si queda algún movimiento posible
+    let hayMovimientos = false;
+
+    // Bucle for clásico (UD3: bucle for)
+    for (let i = 0; i < 15; i++) {
+        if (tablero[i]) {
+            const validos = obtenerMovimientosValidos(i);
+            if (validos.length > 0) {
+                hayMovimientos = true;
+                break; // No hace falta seguir buscando
+            }
+        }
+    }
+
+    if (!hayMovimientos) {
+        // Detener el temporizador
+        clearInterval(temporizador);
+        temporizador = null;
+        juegoActivo = false;
+
+        // Mostrar mensaje según resultado
+        if (fichasRestantes === 1) {
+            alert('🎉 ¡VICTORIA! Has dejado solo 1 ficha en ' +
+                  movimientos + ' movimientos y ' +
+                  formatearTiempo(tiempoSegundos) + '.');
+        } else {
+            alert('😔 Fin de la partida. Quedan ' + fichasRestantes +
+                  ' fichas. ¡Inténtalo de nuevo!');
+        }
+    }
+}
+
+// FUNCIÓN: DESHACER ÚLTIMO MOVIMIENTO 
+function deshacer() {
+    // pop() saca el último elemento del array (UD3: arrays)
+    if (historialMovimientos.length === 0) {
+        return; // No hay nada que deshacer
+    }
+
+    const ultimo = historialMovimientos.pop();
+
+    // Revertir el movimiento
+    tablero[ultimo.origen] = true;
+    tablero[ultimo.intermedia] = true;
+    tablero[ultimo.destino] = false;
+
+    // Actualizar el DOM
+    elementosTablero[ultimo.origen].classList.remove('vacia');
+    elementosTablero[ultimo.origen].classList.add('ficha');
+    elementosTablero[ultimo.intermedia].classList.remove('vacia');
+    elementosTablero[ultimo.intermedia].classList.add('ficha');
+    elementosTablero[ultimo.destino].classList.remove('ficha');
+    elementosTablero[ultimo.destino].classList.add('vacia');
+
+    movimientos--;
+    fichasRestantes++;
+    actualizarEstadisticas();
+}
+
+//  FUNCIÓN: MOSTRAR PISTA 
+function mostrarPista() {
+    // Buscar el primer movimiento válido que exista
+    for (let i = 0; i < 15; i++) {
+        if (tablero[i]) {
+            const validos = obtenerMovimientosValidos(i);
+            if (validos.length > 0) {
+                // Resaltar la ficha que puede moverse
+                elementosTablero[i].classList.add('seleccionada');
+                // Quitar el resaltado después de 1 segundo
+                setTimeout(() => {
+                    elementosTablero[i].classList.remove('seleccionada');
+                }, 1000);
+                return; // Solo mostrar una pista
+            }
+        }
+    }
+}
+
+//  FUNCIÓN: INICIAR TEMPORIZADOR 
+// setInterval ejecuta una función cada X milisegundos
+// Función flecha (UD3: arrow function) => sintaxis concisa
+function iniciarTemporizador() {
+    temporizador = setInterval(() => {
+        tiempoSegundos++;
+        spanTiempo.textContent = formatearTiempo(tiempoSegundos);
+    }, 1000); // 1000 ms = 1 segundo
+}
+// --- VALIDACIÓN DEL FORMULARIO ---
+function validarFormulario(evento) {
+    // preventDefault(): evita que el formulario recargue la página
+    evento.preventDefault();
+
+    const nombre = document.getElementById('nombre').value.trim();
+    const email = document.getElementById('email').value.trim();
+
+    // Validar nombre (mínimo 2 caracteres)
+    if (nombre.length < 2) {
+        alert('El nombre debe tener al menos 2 caracteres.');
+        return;
+    }
+
+    // Validar email si se ha escrito algo
+    if (email.length > 0) {
+        // Comprobar que contiene @ y un punto después
+        if (!email.includes('@') || !email.includes('.')) {
+            alert('El formato del email no es válido.');
+            return;
+        }
+    }
+
+    // Si pasa la validación, mostrar mensaje (en UD6 lo enviaremos al servidor)
+    alert('✅ Puntuación guardada!\n' +
+          'Jugador: ' + nombre + '\n' +
+          'Fichas restantes: ' + fichasRestantes + '\n' +
+          'Movimientos: ' + movimientos + '\n' +
+          'Tiempo: ' + formatearTiempo(tiempoSegundos));
+
+    console.log('Datos del formulario:', { nombre, email, fichasRestantes, movimientos });
+}
+
+
+// ============================================================
+// EVENT LISTENERS — Conectar HTML con JavaScript
+// addEventListener('evento', función) → UD3: eventos
+// ============================================================
+
+// Clic en cada posición del tablero
+elementosTablero.forEach((elemento, indice) => {
+    elemento.addEventListener('click', () => {
+        manejarClic(indice);
+    });
+});
+
+// Clic en los botones de control
+btnReiniciar.addEventListener('click', inicializarJuego);
+btnDeshacer.addEventListener('click', deshacer);
+btnPista.addEventListener('click', mostrarPista);
+
+// Envío del formulario
+formPuntuacion.addEventListener('submit', validarFormulario);
+
+
+// ============================================================
+// INICIALIZACIÓN — Se ejecuta al cargar la página
+// ============================================================
+inicializarJuego();
+console.log('🔺 Solitario Triangular — JS cargado correctamente');
