@@ -338,6 +338,40 @@ section h2 {
     box-shadow: 0 0 5px rgba(93, 64, 55, 0.3); /* Brillo sutil */
 }
 
+/* 
+   8b. VALIDACIÓN DE FORMULARIOS 
+*/
+
+/* Mensaje de error: texto rojo debajo del campo */
+.mensaje-error {
+    display: block;
+    color: #d32f2f;                   
+    font-size: 0.8em;
+    margin-top: 4px;
+    min-height: 18px;                  /* Reserva espacio para evitar saltos */
+}
+
+/* Input con error: borde rojo (JS añade esta clase) */
+.input-error {
+    border-color: #d32f2f !important;  /* Rojo */
+    box-shadow: 0 0 5px rgba(211, 47, 47, 0.3);
+}
+
+/* Input válido: borde verde (JS añade esta clase) */
+.input-valido {
+    border-color: #388E3C !important;  
+    box-shadow: 0 0 5px rgba(56, 142, 60, 0.3);
+}
+
+/* Mensaje de éxito al guardar */
+.mensaje-exito {
+    background-color: #e8f5e9;        
+    padding: 12px;
+    border-radius: 6px;
+    text-align: center;
+    margin: 15px 0;
+    font-weight: bold;
+}
 
 /* 
    9. TABLA DE RANKING
