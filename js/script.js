@@ -32,21 +32,21 @@ let historialMovimientos = [];  // Array como pila para deshacer (push/pop)
 // Cada movimiento es [posición_intermedia, posición_destino]
 // Ejemplo: desde la posición 0, puedes saltar sobre la 1 y caer en la 3
 const CONEXIONES = {
-    0:  [[1,3], [2,5]],
-    1:  [[0,2], [3,6], [4,8]],  // añadido salto diagonal
-    2:  [[0,1], [4,7], [5,9]],  // añadido salto diagonal
-    3:  [[1,0], [4,5], [6,10], [7,12]],
-    4:  [[7,11], [8,13]],
-    5:  [[2,0], [4,3], [8,12], [9,14]],
-    6:  [[1,0], [3,1], [7,8], [11,13]],  // corregido
-    7:  [[4,2], [8,9]],
-    8:  [[4,1], [7,6]],
-    9:  [[5,2], [8,7]],
-    10: [[6,3], [11,12]],
-    11: [[7,4], [12,13]],
-    12: [[7,3], [8,5], [11,10], [13,14]],
-    13: [[8,4], [12,11]],
-    14: [[9,5], [13,12]]
+    0: [[1, 3], [2, 5]],
+    1: [[0, 2], [3, 6], [4, 8]],  // añadido salto diagonal
+    2: [[0, 1], [4, 7], [5, 9]],  // añadido salto diagonal
+    3: [[1, 0], [4, 5], [6, 10], [7, 12]],
+    4: [[7, 11], [8, 13]],
+    5: [[2, 0], [4, 3], [8, 12], [9, 14]],
+    6: [[1, 0], [3, 1], [7, 8], [11, 13]],  // corregido
+    7: [[4, 2], [8, 9]],
+    8: [[4, 1], [7, 6]],
+    9: [[5, 2], [8, 7]],
+    10: [[6, 3], [11, 12]],
+    11: [[7, 4], [12, 13]],
+    12: [[7, 3], [8, 5], [11, 10], [13, 14]],
+    13: [[8, 4], [12, 11]],
+    14: [[9, 5], [13, 12]]
 };
 
 // SELECCIÓN DE ELEMENTOS DEL DOM 
@@ -276,11 +276,11 @@ function verificarFinJuego() {
         // Mostrar mensaje según resultado
         if (fichasRestantes === 1) {
             alert(' ¡VICTORIA! Has dejado solo 1 ficha en ' +
-                  movimientos + ' movimientos y ' +
-                  formatearTiempo(tiempoSegundos) + '.');
+                movimientos + ' movimientos y ' +
+                formatearTiempo(tiempoSegundos) + '.');
         } else {
             alert(' Fin de la partida. Quedan ' + fichasRestantes +
-                  ' fichas. ¡Inténtalo de nuevo!');
+                ' fichas. ¡Inténtalo de nuevo!');
         }
     }
 }
@@ -339,39 +339,143 @@ function iniciarTemporizador() {
         spanTiempo.textContent = formatearTiempo(tiempoSegundos);
     }, 1000); // 1000 ms = 1 segundo
 }
-//  VALIDACIÓN DEL FORMULARIO -
+
+
+// VALIDACIÓN DE FORMULARIOS 
+
+
+// FUNCIÓN: MOSTRAR ERROR EN UN CAMPO 
+// Recibe el input y el mensaje, y lo muestra en el <span> correspondiente
+function mostrarError(inputId, mensaje) {
+    const input = document.getElementById(inputId);
+    const spanError = document.getElementById('error-' + inputId);
+    
+    // Cambiar el texto del span de error
+    spanError.textContent = mensaje;
+    
+    // Cambiar las clases del input para que se ponga rojo
+    input.classList.remove('input-valido');
+    input.classList.add('input-error');
+}
+
+// FUNCIÓN: LIMPIAR ERROR DE UN CAMPO 
+function limpiarError(inputId) {
+    const input = document.getElementById(inputId);
+    const spanError = document.getElementById('error-' + inputId);
+    
+    spanError.textContent = '';
+    input.classList.remove('input-error');
+    input.classList.add('input-valido');
+}
+
+//  FUNCIÓN: VALIDAR NOMBRE 
+// Retorna true si es válido, false si no
+function validarNombre() {
+    const nombre = document.getElementById('nombre').value.trim();
+    
+    if (nombre.length === 0) {
+        mostrarError('nombre', 'El nombre es obligatorio.');
+        return false;
+    }
+    if (nombre.length < 2) {
+        mostrarError('nombre', 'El nombre debe tener al menos 2 caracteres.');
+        return false;
+    }
+    if (nombre.length > 50) {
+        mostrarError('nombre', 'El nombre no puede superar los 50 caracteres.');
+        return false;
+    }
+    
+    // Si llegamos aquí, es válido
+    limpiarError('nombre');
+    return true;
+}
+
+// FUNCIÓN: VALIDAR EMAIL 
+// Usa una expresión regular (regex) para comprobar el formato
+function validarEmail() {
+    const email = document.getElementById('email').value.trim();
+    
+    // Si está vacío, es válido (el email es opcional)
+    if (email.length === 0) {
+        // Quitar cualquier estilo de error/válido
+        const input = document.getElementById('email');
+        const spanError = document.getElementById('error-email');
+        spanError.textContent = '';
+        input.classList.remove('input-error', 'input-valido');
+        return true;
+    }
+    
+    // Expresión regular para validar email
+    // Busca: texto@texto.texto
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (!regexEmail.test(email)) {
+        mostrarError('email', 'El formato del email no es válido. Ejemplo: nombre@dominio.com');
+        return false;
+    }
+    
+    limpiarError('email');
+    return true;
+}
+
+//  FUNCIÓN: VALIDAR CONTRASEÑA 
+// Requisitos: mínimo 6 caracteres, al menos 1 número
+function validarPassword() {
+    const password = document.getElementById('password').value;
+    
+    if (password.length === 0) {
+        mostrarError('password', 'La contraseña es obligatoria.');
+        return false;
+    }
+    if (password.length < 6) {
+        mostrarError('password', 'La contraseña debe tener al menos 6 caracteres.');
+        return false;
+    }
+    
+    // Regex: busca al menos un dígito (0-9)
+    const regexNumero = /[0-9]/;
+    if (!regexNumero.test(password)) {
+        mostrarError('password', 'La contraseña debe contener al menos un número.');
+        return false;
+    }
+    
+    limpiarError('password');
+    return true;
+}
+
+// - FUNCIÓN: VALIDAR TODO EL FORMULARIO (evento submit) 
 function validarFormulario(evento) {
     // preventDefault(): evita que el formulario recargue la página
     evento.preventDefault();
-
-    const nombre = document.getElementById('nombre').value.trim();
-    const email = document.getElementById('email').value.trim();
-
-    // Validar nombre (mínimo 2 caracteres)
-    if (nombre.length < 2) {
-        alert('El nombre debe tener al menos 2 caracteres.');
-        return;
+    
+    // Ejecutar todas las validaciones
+    const nombreOk = validarNombre();
+    const emailOk = validarEmail();
+    const passwordOk = validarPassword();
+    
+    // Solo si TODAS son válidas, procesamos el formulario
+    if (nombreOk && emailOk && passwordOk) {
+        const nombre = document.getElementById('nombre').value.trim();
+        
+        // Mostrar mensaje de éxito en el DOM (no alert)
+        const mensajeExito = document.getElementById('mensaje-exito');
+        mensajeExito.style.display = 'block';
+        
+        // Ocultar el mensaje después de 3 segundos
+        setTimeout(() => {
+            mensajeExito.style.display = 'none';
+        }, 3000);
+        
+        console.log('Formulario válido. Datos:', {
+            nombre: nombre,
+            email: document.getElementById('email').value.trim(),
+            fichasRestantes: fichasRestantes,
+            movimientos: movimientos,
+            tiempo: formatearTiempo(tiempoSegundos)
+        });
     }
-
-    // Validar email si se ha escrito algo
-    if (email.length > 0) {
-        // Comprobar que contiene @ y un punto después
-        if (!email.includes('@') || !email.includes('.')) {
-            alert('El formato del email no es válido.');
-            return;
-        }
-    }
-
-    // Si pasa la validación, mostrar mensaje 
-    alert(' Puntuación guardada!\n' +
-          'Jugador: ' + nombre + '\n' +
-          'Fichas restantes: ' + fichasRestantes + '\n' +
-          'Movimientos: ' + movimientos + '\n' +
-          'Tiempo: ' + formatearTiempo(tiempoSegundos));
-
-    console.log('Datos del formulario:', { nombre, email, fichasRestantes, movimientos });
 }
-
 
 // EVENT LISTENERS: Conectar HTML con JavaScript
 
