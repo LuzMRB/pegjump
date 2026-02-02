@@ -187,3 +187,44 @@ http://127.0.0.1:5500/index.html
 | tiempo_segundos | INT | Duración en segundos |
 | puntuacion | INT | Puntuación calculada |
 | fecha | TIMESTAMP | Fecha de la partida |
+
+## Registro de Usuarios y Seguridad
+
+### Nuevos archivos
+| Archivo | Descripción |
+|---------|-------------|
+| `php/registro.php` | Registro con $_POST, prepared statements, password_hash |
+| `php/login.php` | Login con password_verify() y $_SESSION |
+| `php/logout.php` | Cierre de sesión con session_destroy() |
+
+### Conceptos de Seguridad Implementados 
+
+**Prevención de Inyección SQL:**
+- Todas las consultas usan `mysqli_prepare()` + `mysqli_stmt_bind_param()`
+- Los marcadores `?` separan la instrucción SQL de los datos del usuario
+- Los datos NUNCA se concatenan directamente en las consultas
+
+**Prevención de XSS (Cross-Site Scripting):**
+- `htmlspecialchars(ENT_QUOTES, 'UTF-8')` en toda salida de datos
+- Los datos del usuario se sanitizan antes de mostrarse en HTML
+
+**Almacenamiento Seguro de Contraseñas:**
+- `password_hash(PASSWORD_DEFAULT)` genera hashes bcrypt con salt
+- `password_verify()` compara contraseñas de forma segura
+- Las contraseñas NUNCA se almacenan en texto plano
+
+**Gestión de Sesiones:**
+- `session_start()` al inicio de cada script PHP
+- `$_SESSION` almacena datos del usuario entre páginas
+- `session_regenerate_id()` previene session fixation
+- `session_destroy()` limpia la sesión al cerrar
+
+**Validación Doble (Cliente + Servidor):**
+- JavaScript valida en el navegador (feedback rápido)
+- PHP valida en el servidor (seguridad real)
+- El servidor NUNCA confía en los datos del cliente
+
+### URLs del sistema
+- Registro: `http://localhost/Full_stack_proyect/php/registro.php`
+- Login: `http://localhost/Full_stack_proyect/php/login.php`
+- Juego: `http://localhost/Full_stack_proyect/index.php`

@@ -9,7 +9,7 @@ session_start();
 // Integra PHP con HTML para cargar datos dinámicos desde la BD.
 
 //   - PHP se integra directamente con HTML (
-//   - Las etiquetas <?php ... ?> permiten insertar código PHP
+//   - Las etiquetas PHP permiten insertar código dentro del HTML.
 //     dentro del HTML.
 //   - require_once: Incluye un archivo PHP una sola vez.
 //   - htmlspecialchars(): Convierte caracteres especiales a 
