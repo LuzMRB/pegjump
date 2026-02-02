@@ -444,37 +444,175 @@ function validarPassword() {
     return true;
 }
 
-// - FUNCIÓN: VALIDAR TODO EL FORMULARIO (evento submit) 
+//  FUNCIÓN: VALIDAR TODO EL FORMULARIO (evento submit) 
+//  Ahora el formulario se envía al servidor PHP con fetch()
 function validarFormulario(evento) {
     // preventDefault(): evita que el formulario recargue la página
     evento.preventDefault();
     
-    // Ejecutar todas las validaciones
+    // Ejecutar todas las validaciones (en el CLIENTE)
     const nombreOk = validarNombre();
     const emailOk = validarEmail();
     const passwordOk = validarPassword();
     
-    // Solo si TODAS son válidas, procesamos el formulario
+    // Solo si TODAS son válidas, enviamos al servidor
     if (nombreOk && emailOk && passwordOk) {
-        const nombre = document.getElementById('nombre').value.trim();
-        
-        // Mostrar mensaje de éxito en el DOM (no alert)
-        const mensajeExito = document.getElementById('mensaje-exito');
-        mensajeExito.style.display = 'block';
-        
-        // Ocultar el mensaje después de 3 segundos
-        setTimeout(() => {
-            mensajeExito.style.display = 'none';
-        }, 3000);
-        
-        console.log('Formulario válido. Datos:', {
-            nombre: nombre,
-            email: document.getElementById('email').value.trim(),
-            fichasRestantes: fichasRestantes,
-            movimientos: movimientos,
-            tiempo: formatearTiempo(tiempoSegundos)
-        });
+        // Llamar a la función que envía los datos al servidor PHP
+        enviarPuntuacion();
     }
+}
+
+
+//  FUNCIÓN: ENVIAR PUNTUACIÓN AL SERVIDOR (fetch + PHP)
+
+// fetch(): API moderna de JavaScript para hacer peticiones HTTP 
+// Envía los datos al script PHP (php/process.php) que:
+//   1. Valida los datos en el SERVIDOR (doble validación)
+//   2. Guarda el usuario en la BD (INSERT INTO usuarios)
+//   3. Guarda la puntuación en la BD (INSERT INTO puntuaciones)
+//   4. Devuelve una respuesta JSON
+//
+// CONCEPTO IMPORTANTE:
+//   La validación se hace en AMBOS lados:
+//   - En el CLIENTE (JavaScript): para dar feedback rápido al usuario
+//   - En el SERVIDOR (PHP): para garantizar la seguridad 
+//   Un usuario malicioso podría desactivar JavaScript y enviar datos
+//   directamente al servidor, así que la validación en PHP es ESENCIAL.
+
+function enviarPuntuacion() {
+    // Recoger los datos del formulario
+    const datos = {
+        nombre: document.getElementById('nombre').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        password: document.getElementById('password').value,
+        fichas_restantes: fichasRestantes,
+        movimientos: movimientos,
+        tiempo_segundos: tiempoSegundos
+    };
+
+    // Ocultar mensajes anteriores
+    const mensajeExito = document.getElementById('mensaje-exito');
+    const mensajeError = document.getElementById('mensaje-servidor-error');
+    mensajeExito.style.display = 'none';
+    if (mensajeError) mensajeError.style.display = 'none';
+
+    // fetch(): Envía una petición HTTP al servidor
+    // Parámetros:
+    //   - URL: 'php/process.php' (ruta al script PHP)
+    //   - Opciones: method, headers, body
+    
+    // method: 'POST': Envío seguro de datos 
+    // headers: Content-Type: application/json: Los datos van en formato JSON
+    // body: JSON.stringify(datos): Convierte el objeto JS a cadena JSON
+    //
+    fetch('php/process.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(datos)
+    })
+    // .then(): Se ejecuta cuando el servidor RESPONDE 
+    // response.json(): Parsea la respuesta JSON del servidor
+    .then(response => response.json())
+    // Segundo .then(): Procesa los datos parseados
+    .then(data => {
+        console.log('Respuesta del servidor:', data);
+
+        if (data.exito) {
+            // ÉXITO: Mostrar mensaje verde
+            mensajeExito.textContent = data.mensaje;
+            mensajeExito.style.display = 'block';
+
+            // Ocultar después de 4 segundos
+            setTimeout(() => {
+                mensajeExito.style.display = 'none';
+            }, 4000);
+
+            // Actualizar la tabla del ranking sin recargar la página
+            cargarRanking();
+
+            // Limpiar el formulario
+            document.getElementById('form-puntuacion').reset();
+            // Quitar estilos de validación
+            ['nombre', 'email', 'password'].forEach(id => {
+                const input = document.getElementById(id);
+                input.classList.remove('input-valido', 'input-error');
+                const span = document.getElementById('error-' + id);
+                if (span) span.textContent = '';
+            });
+
+        } else {
+            // ERROR del servidor: Mostrar mensaje rojo
+            if (mensajeError) {
+                mensajeError.textContent = data.mensaje;
+                mensajeError.style.display = 'block';
+                setTimeout(() => {
+                    mensajeError.style.display = 'none';
+                }, 5000);
+            }
+        }
+    })
+    // .catch(): Se ejecuta si hay un ERROR de red (servidor caído, etc.)
+    .catch(error => {
+        console.error('Error de red:', error);
+        if (mensajeError) {
+            mensajeError.textContent = 'Error de conexión con el servidor. ¿Está XAMPP ejecutándose?';
+            mensajeError.style.display = 'block';
+        }
+    });
+}
+
+
+//  FUNCIÓN: CARGAR RANKING DESDE EL SERVIDOR
+
+// Hace una petición GET a php/get_ranking.php
+// y actualiza la tabla HTML con los datos recibidos.
+
+// Se llama:
+//   1. Al cargar la página
+//   2. Después de guardar una nueva puntuación
+
+function cargarRanking() {
+    fetch('php/get_ranking.php')
+    .then(response => response.json())
+    .then(data => {
+        if (data.exito && data.ranking) {
+            // Seleccionar el <tbody> de la tabla
+            const tbody = document.getElementById('ranking-body');
+            
+            // Limpiar el contenido actual del tbody
+            tbody.innerHTML = '';
+
+            if (data.ranking.length === 0) {
+                // Si no hay datos, mostrar mensaje
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">No hay puntuaciones todavía.</td></tr>';
+                return;
+            }
+
+            // Recorrer cada puntuación y crear una fila <tr>
+            data.ranking.forEach((item, indice) => {
+                // document.createElement(): Crea un elemento HTML nuevo
+                const fila = document.createElement('tr');
+                
+                // innerHTML: Establece el contenido HTML de un elemento
+                fila.innerHTML = 
+                    '<td>' + (indice + 1) + '</td>' +
+                    '<td>' + item.nombre + '</td>' +
+                    '<td>' + item.fichas_restantes + '</td>' +
+                    '<td>' + item.movimientos + '</td>' +
+                    '<td>' + item.tiempo + '</td>' +
+                    '<td>' + item.puntuacion + '</td>';
+                
+                // appendChild(): Añade el elemento como hijo del tbody
+                tbody.appendChild(fila);
+            });
+        }
+    })
+    .catch(error => {
+        console.log('No se pudo cargar el ranking:', error.message);
+        // No mostrar error al usuario, el ranking PHP ya está cargado
+    });
 }
 
 // EVENT LISTENERS: Conectar HTML con JavaScript
@@ -530,7 +668,7 @@ document.getElementById('password').addEventListener('focus', () => {
     // Si no hay error, mostrar una pista
     if (spanError.textContent === '') {
         spanError.textContent = 'Mínimo 6 caracteres y 1 número';
-        spanError.style.color = '#3effe2ff';  // Marrón (pista, no error)
+        spanError.style.color = '#3effe2ff'; 
     }
 });
 
