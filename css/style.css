@@ -1,203 +1,339 @@
-/* ============================================================
+/* 
    STYLE.CSS — Solitario Triangular
-   Hoja de estilos EXTERNA (buena práctica según UD2)
+   Hoja de estilos EXTERNA 
    
    Contenido:
-   1. Reset y estilos generales
-   2. Header y navegación
-   3. Secciones principales
-   4. Tablero de juego
-   5. Panel de estadísticas
-   6. Botones
-   7. Reglas del juego
-   8. Formulario
-   9. Tabla de ranking
-   10. Footer
-   11. Media Queries (diseño responsivo)
-============================================================ */
+   1. CSS Custom Properties (Variables) 
+   2. Reset y estilos generales
+   3. Header y navegación (con menú hamburguesa)
+   4. Secciones principales
+   5. Tablero de juego
+   6. Panel de estadísticas (CSS Grid avanzado)
+   7. Botones
+   8. Reglas del juego (CSS Grid auto-fit)
+   9. Formulario
+   10. Tabla de ranking (responsive)
+   11. Footer
+   12. Animaciones (@keyframes) 
+   13. Media Queries — 3 breakpoints (1024px, 768px, 480px)
+   14. Print stylesheet 
+   15. Reduced motion — Accesibilidad NUEVO
+*/
 
 
-/* ============================================================
-   1. RESET Y ESTILOS GENERALES
+/*
+   1. CSS CUSTOM PROPERTIES (Variables CSS) 
+   Las Custom Properties (variables) permiten definir valores
+   reutilizables en toda la hoja de estilos.
    
-   El "reset" elimina los estilos por defecto del navegador
-   para que todos los navegadores muestren lo mismo.
+   Sintaxis:
+     Definir:  --nombre-variable: valor;
+     Usar:     var(--nombre-variable)
    
-   CONCEPTOS UD2:
-   - margin: espacio EXTERIOR del elemento
-   - padding: espacio INTERIOR del elemento
-   - box-sizing: border-box hace que padding y border
-     se incluyan dentro del ancho total del elemento
-   - font-family: define la fuente del texto
-============================================================ */
+   Ventajas (UD6 §3 - Diseño responsivo):
+     - Un solo lugar para cambiar colores/tamaños
+     - Facilita mantener consistencia visual
+     - Permite crear "temas" fácilmente
+     - Se pueden cambiar con Media Queries
+   
+   :root es el elemento raíz del documento (equivale a <html>)
+   Al definir variables aquí, están disponibles en todo el CSS.
+ */
 
-/* Aplica box-sizing a TODOS los elementos (*) */
+:root {
+    /* --- Colores principales --- */
+    --color-primario: #8b5e3c;
+    --color-primario-claro: #a1887f;
+    --color-primario-oscuro: #5d4037;
+    --color-secundario: #ff8f00;
+    --color-secundario-oscuro: #e65100;
+    
+    /* --- Colores de fondo --- */
+    --color-fondo: #fff4cc;
+    --color-fondo-seccion: #fff;
+    --color-fondo-tarjeta: #FFF4CC;
+    --color-fondo-stats: #efebe9;
+    --color-fondo-form: #fafafa;
+    
+    /* --- Colores de texto --- */
+    --color-texto: #333333;
+    --color-texto-claro: #555555;
+    --color-texto-blanco: #ffffff;
+    --color-texto-suave: #d7ccc8;
+    
+    /* --- Colores de estado --- */
+    --color-exito: #4CAF50;
+    --color-exito-oscuro: #388E3C;
+    --color-error: #d32f2f;
+    --color-error-fondo: #ffebee;
+    --color-exito-fondo: #e8f5e9;
+    
+    /* --- Colores del tablero --- */
+    --color-ficha: #ec0ea2;
+    --color-ficha-borde: #f107d9;
+    --color-ficha-hover: #0fbcf1;
+    --color-seleccion: #ffab00;
+    --color-seleccion-borde: #ff8f00;
+    --color-vacia: #d7ccc8;
+    --color-vacia-borde: #bcaaa4;
+    --color-posicion-borde: #f60606;
+    
+    /* --- Espaciado (sistema de escala) --- */
+    --espaciado-xs: 5px;
+    --espaciado-sm: 10px;
+    --espaciado-md: 15px;
+    --espaciado-lg: 20px;
+    --espaciado-xl: 30px;
+    
+    /* --- Bordes y sombras --- */
+    --radio-borde: 8px;
+    --radio-borde-sm: 4px;
+    --radio-borde-lg: 12px;
+    --sombra-suave: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --sombra-media: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    /* --- Tipografía --- */
+    --fuente-principal: 'Segoe UI', Tahoma, Geneva, Verdana, 'Times New Roman';
+    --tamano-base: 1rem;
+    --tamano-h1: 2em;
+    --tamano-h2: 1.8em;
+    --linea-altura: 1.6;
+    
+    /* --- Transiciones --- */
+    --transicion-rapida: 0.2s ease;
+    --transicion-normal: 0.3s ease;
+    
+    /* --- Anchos máximos  */
+    --ancho-max-contenido: 900px;
+    --ancho-max-seccion: 1000px;
+    --ancho-max-formulario: 500px;
+    
+    /* --- Tamaño fichas del tablero --- */
+    --tamano-ficha: 50px;
+    --gap-tablero: 8px;
+}
+
+
+/* 
+   2. RESET Y ESTILOS GENERALES
+*/
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Estilos del body: afectan a toda la página */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 'Times New Roman';
-    background-color: #fff4cc;       /* Fondo beige claro */
-    color: #333333;                      /* Color del texto: gris oscuro */
-    line-height: 1.6;                 /* Altura de línea: mejora legibilidad */
+    font-family: var(--fuente-principal);
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    line-height: var(--linea-altura);
+}
+
+/* Imágenes flexibles — max-width: 100% evita desbordamiento */
+img {
+    max-width: 100%;
+    height: auto;
 }
 
 
 /* 
-   2. HEADER Y NAVEGACIÓN
-   
+   3. HEADER Y NAVEGACIÓN (con menú hamburguesa — UD6 §3)
  */
 
 header {
-    background-color: #8b5e3c;        /* Marrón oscuro */
-    color: #fff;                      /* Texto blanco */
-    padding: 20px 0;                  /* 20px arriba/abajo, 0 a los lados */
+    background-color: var(--color-primario);
+    color: var(--color-texto-blanco);
+    padding: var(--espaciado-lg) 0;
     text-align: center;
+    /* UD6: position sticky mantiene el header visible al hacer scroll */
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-/* Clase .container: centra el contenido con ancho máximo */
 .container {
-    max-width: 900px;                 /* No se estira más de 900px */
-    margin: 0 auto;                   /* auto en los lados = centrado */
-    padding: 0 20px;                  /* Espacio a los lados */
+    max-width: var(--ancho-max-contenido);
+    margin: 0 auto;
+    padding: 0 var(--espaciado-lg);
+    position: relative;
 }
 
 header h1 {
-    font-size: 2em;                   /* 2 veces el tamaño base */
-    margin-bottom: 5px;
+    font-size: var(--tamano-h1);
+    margin-bottom: var(--espaciado-xs);
 }
 
 .subtitulo {
     font-size: 0.9em;
-    color: #d7ccc8;                   /* Beige claro */
-    margin-bottom: 15px;
+    color: var(--color-texto-suave);
+    margin-bottom: var(--espaciado-md);
 }
 
-/* Navegación: lista horizontal con Flexbox */
+/* Navegación con Flexbox  */
 nav ul {
-    list-style: none;                 /* Elimina las viñetas de la lista */
-    display: flex;                    /* Flexbox: pone los items en fila */
-    justify-content: center;          /* Centra los items horizontalmente */
-    gap: 20px;                        /* Espacio entre los items */
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: var(--espaciado-lg);
 }
 
-/* Estilos de los enlaces del nav */
 nav a {
-    color: #fff;                      /* Texto blanco */
-    text-decoration: none;            /* Quita el subrayado */
+    color: var(--color-texto-blanco);
+    text-decoration: none;
     font-weight: bold;
-    padding: 8px 16px;
-    border-radius: 4px;               /* Esquinas redondeadas */
-    transition: background-color 0.3s; /* Transición suave al hacer hover */
+    padding: var(--espaciado-sm) 16px;
+    border-radius: var(--radio-borde-sm);
+    transition: background-color var(--transicion-normal);
 }
 
-/* 
-   PSEUDO-CLASE :hover
-   Se activa cuando el cursor pasa por encima del elemento.
-*/
 nav a:hover {
-    background-color: #e20909;      
+    background-color: #e20909;
 }
 
+/* ── MENÚ HAMBURGUESA  
+   Botón con 3 <span> que forman las líneas ≡
+   Solo visible en pantallas < 768px (ver Media Queries)
+   JS añade/quita la clase .activo para mostrar/ocultar nav */
+
+.hamburguesa {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    padding: var(--espaciado-sm);
+    background: none;
+    border: none;
+    position: absolute;
+    right: var(--espaciado-lg);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 101;
+}
+
+.hamburguesa span {
+    display: block;
+    width: 28px;
+    height: 3px;
+    background-color: var(--color-texto-blanco);
+    border-radius: 2px;
+    transition: transform var(--transicion-normal),
+                opacity var(--transicion-normal);
+}
+
+/* Animación ≡  cuando está activo */
+.hamburguesa.activo span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+.hamburguesa.activo span:nth-child(2) {
+    opacity: 0;
+}
+.hamburguesa.activo span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+
 /* 
-   3. SECCIONES PRINCIPALES
-   
- */
+   4. SECCIONES PRINCIPALES
+*/
 
 section {
-    max-width: 1000px;
-    margin: 30px auto;                /* 30px arriba/abajo, centrado */
-    padding: 30px;
-    background-color: #fff;           /* Fondo blanco */
-    border-radius: 8px;               /* Esquinas redondeadas */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    max-width: var(--ancho-max-seccion);
+    margin: var(--espaciado-xl) auto;
+    padding: var(--espaciado-xl);
+    background-color: var(--color-fondo-seccion);
+    border-radius: var(--radio-borde);
+    box-shadow: var(--sombra-suave);
 }
 
 section h2 {
-    color: #5d4037;                   /* Marrón oscuro */
+    color: var(--color-primario-oscuro);
     text-align: center;
-    margin-bottom: 20px;
-    font-size: 1.8em;
+    margin-bottom: var(--espaciado-lg);
+    font-size: var(--tamano-h2);
 }
 
 
 /* 
-   4. TABLERO DE JUEGO
-   
- */
+   5. TABLERO DE JUEGO (Flexbox — UD6 §3)
+*/
 
 .tablero-container {
     display: flex;
-    justify-content: center;          /* Centra el tablero */
-    margin: 20px 0;
+    justify-content: center;
+    margin: var(--espaciado-lg) 0;
 }
 
 .tablero {
     display: flex;
-    flex-direction: column;           /* Las filas se apilan verticalmente */
-    align-items: center;              /* Centra cada fila */
-    gap: 8px;                         /* Espacio entre filas */
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-tablero);
 }
 
 .fila {
-    display: flex;                    /* Los huecos de cada fila en horizontal */
-    gap: 8px;                         /* Espacio entre posiciones */
+    display: flex;
+    gap: var(--gap-tablero);
 }
 
-/* Cada posición del tablero (círculo) */
 .posicion {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;               /* Lo hace circular */
-    border: 2px solid #f60606;        /* Borde marrón */
-    cursor: pointer;                   /* Cursor de mano al pasar */
-    transition: transform 0.2s, background-color 0.3s; /* Transiciones suaves */
+    width: var(--tamano-ficha);
+    height: var(--tamano-ficha);
+    border-radius: 50%;
+    border: 2px solid var(--color-posicion-borde);
+    cursor: pointer;
+    transition: transform var(--transicion-rapida),
+                background-color var(--transicion-normal);
 }
 
-/* Posición con ficha (ocupada) */
 .posicion.ficha {
-    background-color: #ec0ea2;         /* Naranja oscuro */
-    border-color: #f107d9;
-    box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.3); /* Efecto 3D */
+    background-color: var(--color-ficha);
+    border-color: var(--color-ficha-borde);
+    box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* Posición vacía (sin ficha) */
 .posicion.vacia {
-    background-color: #d7ccc8;         /* Beige claro */
-    border-color: #bcaaa4;
+    background-color: var(--color-vacia);
+    border-color: var(--color-vacia-borde);
 }
 
-/* Hover sobre una ficha */
 .posicion.ficha:hover {
-    transform: scale(1.1);             /* Se agranda un 10% */
-    background-color: #0fbcf1;         
+    transform: scale(1.1);
+    background-color: var(--color-ficha-hover);
 }
 
-/* Ficha seleccionada añado luego las fuciones */
 .posicion.seleccionada {
-    background-color: #ffab00;         /* Amarillo/dorado */
-    border-color: #ff8f00;
+    background-color: var(--color-seleccion);
+    border-color: var(--color-seleccion-borde);
     transform: scale(1.15);
-    box-shadow: 0 0 15px rgba(255, 171, 0, 0.6); /* Brillo dorado */
+    box-shadow: 0 0 15px rgba(255, 171, 0, 0.6);
+    animation: pulso 1s ease-in-out infinite;
 }
 
 
 /* 
-   5. PANEL DE ESTADÍSTICAS
+   6. PANEL DE ESTADÍSTICAS  CSS Grid avanzado 
    
+   ANTES: display: flex + justify-content: space-around
+   AHORA: display: grid + grid-template-columns: repeat(3, 1fr)
+   
+   CSS Grid vs Flexbox:
+   - Flexbox: layouts UNIDIMENSIONALES (fila O columna)
+   - CSS Grid: layouts BIDIMENSIONALES (filas Y columnas)
+   
+   repeat(3, 1fr) = 3 columnas de fracción igual
+   La unidad 'fr' reparte el espacio proporcionalmente 
  */
 
 .stats-panel {
-    display: flex;
-    justify-content: space-around;     /* Distribuye equitativamente */
-    margin: 20px 0;
-    padding: 15px;
-    background-color: #efebe9;         /* Fondo beige */
-    border-radius: 8px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--espaciado-md);
+    margin: var(--espaciado-lg) 0;
+    padding: var(--espaciado-md);
+    background-color: var(--color-fondo-stats);
+    border-radius: var(--radio-borde);
 }
 
 .stat {
@@ -205,316 +341,446 @@ section h2 {
 }
 
 .stat-label {
-    display: block;                    /* Ocupa toda la línea */
+    display: block;
     font-size: 0.85em;
-    color: #795548;                    
+    color: #795548;
 }
 
 .stat-valor {
     display: block;
     font-size: 1.5em;
     font-weight: bold;
-    color: #5d4037;                 
+    color: var(--color-primario-oscuro);
 }
 
 
 /* 
-   6. BOTONES
-   
-*/
+   7. BOTONES (Flexbox con flex-wrap — UD6 §3)
+ */
 
 .controles {
     display: flex;
     justify-content: center;
-    gap: 15px;                         /* Espacio entre botones */
-    margin-top: 20px;
+    gap: var(--espaciado-md);
+    margin-top: var(--espaciado-lg);
+    flex-wrap: wrap;
 }
 
-/* Clase base para TODOS los botones */
 .btn {
-    padding: 10px 25px;
-    font-size: 1em;
-    border: none;                      /* Sin borde */
-    border-radius: 6px;
+    padding: var(--espaciado-sm) 25px;
+    font-size: var(--tamano-base);
+    border: none;
+    border-radius: var(--radio-borde);
     cursor: pointer;
     font-weight: bold;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: background-color var(--transicion-normal),
+                transform var(--transicion-rapida);
 }
 
-/* Botón principal (verde) */
 .btn-primary {
-    background-color: #4CAF50;        
-    color: white;
+    background-color: var(--color-exito);
+    color: var(--color-texto-blanco);
 }
 
 .btn-primary:hover {
-    background-color: #388E3C;         /* Verde más oscuro */
-    transform: translateY(-2px);       /* Sube 2px → efecto de "elevación" */
+    background-color: var(--color-exito-oscuro);
+    transform: translateY(-2px);
 }
 
-/* Botón secundario (gris) */
 .btn-secondary {
-    background-color: #9e9e9e;        
-    color: white;
+    background-color: #9e9e9e;
+    color: var(--color-texto-blanco);
 }
 
 .btn-secondary:hover {
-    background-color: #757575;       
+    background-color: #757575;
     transform: translateY(-2px);
 }
 
 
 /* 
-   7. REGLAS DEL JUEGO (tarjetas)
- */
+   8. REGLAS DEL JUEGO — CSS Grid auto-fit (UD6 §3)
+   
+   auto-fit + minmax() crea un grid AUTO-RESPONSIVO:
+   - auto-fit: crea tantas columnas como quepan
+   - minmax(250px, 1fr): mínimo 250px, máximo fracción igual
+   
+   Resultado:
+   - Desktop: 2 columnas (si hay espacio para 2 × 250px)
+   - Móvil: 1 columna automáticamente (sin media query)
+*/
 
 .reglas-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);  /* 2 columnas iguales */
-    gap: 20px;
-    margin-top: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--espaciado-lg);
+    margin-top: var(--espaciado-lg);
 }
 
 .regla-card {
-    background-color: #FFF4CC;         
-    padding: 20px;
-    border-radius: 8px;
-    border-left: 4px solid #ff8f00;     /* Línea naranja a la izquierda */
+    background-color: var(--color-fondo-tarjeta);
+    padding: var(--espaciado-lg);
+    border-radius: var(--radio-borde);
+    border-left: 4px solid var(--color-secundario);
+    transition: transform var(--transicion-rapida),
+                box-shadow var(--transicion-normal);
+}
+
+.regla-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--sombra-media);
 }
 
 .regla-card h3 {
-    color: #e65100;                     /* Naranja oscuro */
-    margin-bottom: 8px;
+    color: var(--color-secundario-oscuro);
+    margin-bottom: var(--espaciado-sm);
 }
 
 .regla-card p {
-    color: #555;
+    color: var(--color-texto-claro);
     font-size: 0.95em;
 }
 
 
 /* 
-   8. FORMULARIO
-*/
+   9. FORMULARIO
+ */
 
 .formulario {
-    max-width: 500px;
-    margin: 0 auto 30px;              /* Centrado con margen inferior */
+    max-width: var(--ancho-max-formulario);
+    margin: 0 auto var(--espaciado-xl);
     padding: 25px;
-    background-color: #fafafa;
-    border-radius: 8px;
+    background-color: var(--color-fondo-form);
+    border-radius: var(--radio-borde);
     border: 1px solid #e0e0e0;
 }
 
 .formulario h3 {
     text-align: center;
-    color: #5d4037;
-    margin-bottom: 20px;
+    color: var(--color-primario-oscuro);
+    margin-bottom: var(--espaciado-lg);
 }
 
 .form-grupo {
-    margin-bottom: 15px;
+    margin-bottom: var(--espaciado-md);
 }
 
 .form-grupo label {
-    display: block;                    /* Etiqueta en su propia línea */
-    margin-bottom: 5px;
+    display: block;
+    margin-bottom: var(--espaciado-xs);
     font-weight: bold;
-    color: #555;
+    color: var(--color-texto-claro);
 }
 
 .form-grupo input {
-    width: 100%;                       /* Ocupa todo el ancho disponible */
-    padding: 10px;
+    width: 100%;
+    padding: var(--espaciado-sm);
     border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
+    border-radius: var(--radio-borde-sm);
+    font-size: var(--tamano-base);
+    transition: border-color var(--transicion-normal),
+                box-shadow var(--transicion-normal);
 }
 
-/* Pseudo-clase :focus → cuando el usuario hace clic en el campo */
 .form-grupo input:focus {
-    outline: none;                     /* Quita el borde azul por defecto */
-    border-color: #5d4037;             /* Borde marrón */
-    box-shadow: 0 0 5px rgba(93, 64, 55, 0.3); /* Brillo sutil */
+    outline: none;
+    border-color: var(--color-primario-oscuro);
+    box-shadow: 0 0 5px rgba(93, 64, 55, 0.3);
 }
 
-/* 
-   8b. VALIDACIÓN DE FORMULARIOS 
-*/
-
-/* Mensaje de error: texto rojo debajo del campo */
 .mensaje-error {
     display: block;
-    color: #d32f2f;                   
+    color: var(--color-error);
     font-size: 0.8em;
     margin-top: 4px;
-    min-height: 18px;                  /* Reserva espacio para evitar saltos */
+    min-height: 18px;
 }
 
-/* Input con error: borde rojo (JS añade esta clase) */
 .input-error {
-    border-color: #d32f2f !important;  /* Rojo */
+    border-color: var(--color-error) !important;
     box-shadow: 0 0 5px rgba(211, 47, 47, 0.3);
 }
 
-/* Input válido: borde verde (JS añade esta clase) */
 .input-valido {
-    border-color: #388E3C !important;  
+    border-color: var(--color-exito-oscuro) !important;
     box-shadow: 0 0 5px rgba(56, 142, 60, 0.3);
 }
 
-/* Mensaje de éxito al guardar */
 .mensaje-exito {
-    background-color: #e8f5e9;        
+    background-color: var(--color-exito-fondo);
     padding: 12px;
-    border-radius: 6px;
+    border-radius: var(--radio-borde);
     text-align: center;
-    margin: 15px 0;
+    margin: var(--espaciado-md) 0;
     font-weight: bold;
 }
 
+
 /* 
-   9. TABLA DE RANKING
-    */
+   10. TABLA DE RANKING 
+   
+   NUEVO: Wrapper con overflow-x: auto
+   En móvil, si la tabla no cabe, aparece scroll horizontal.
+*/
+
+.tabla-ranking-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
 
 .tabla-ranking {
     width: 100%;
-    border-collapse: collapse;          /* Bordes unidos (sin doble línea) */
-    margin-top: 20px;
+    border-collapse: collapse;
+    margin-top: var(--espaciado-lg);
+    min-width: 500px;
 }
 
 .tabla-ranking th,
 .tabla-ranking td {
     padding: 12px;
     text-align: center;
-    border-bottom: 1px solid #e0e0e0;  /* Línea separadora inferior */
+    border-bottom: 1px solid #e0e0e0;
 }
 
-/* Cabecera de la tabla */
 .tabla-ranking th {
-    background-color: #8B5E3C;          /* Fondo marrón oscuro */
-    color: #fff;                        /* Texto blanco */
+    background-color: var(--color-primario);
+    color: var(--color-texto-blanco);
     font-weight: bold;
+    white-space: nowrap;
 }
 
-/* Filas pares con fondo alterno (efecto zebra) */
 .tabla-ranking tbody tr:nth-child(even) {
     background-color: #f5f5f5;
 }
 
-/* Hover en filas de la tabla */
 .tabla-ranking tbody tr:hover {
-    background-color: #efebe9;
+    background-color: var(--color-fondo-stats);
 }
 
 
 /* 
-   10. FOOTER
- */
+   11. FOOTER
+*/
 
 footer {
-    background-color: #8B5E3C;
-    color: #d7ccc8;
+    background-color: var(--color-primario);
+    color: var(--color-texto-suave);
     text-align: center;
-    padding: 20px 0;
+    padding: var(--espaciado-lg) 0;
     margin-top: 40px;
 }
 
 footer p {
-    margin: 5px 0;
+    margin: var(--espaciado-xs) 0;
     font-size: 0.9em;
 }
 
 
 /* 
-   11. MEDIA QUERIES, DISEÑO RESPONSIVO
+   12. ANIMACIONES (@keyframes) 
    
-   Las Media Queries permiten aplicar estilos DIFERENTES
-   según el tamaño de la pantalla.
+   @keyframes define animaciones con estados intermedios.
+   Se aplican con la propiedad animation.
+*/
+
+@keyframes pulso {
+    0%   { box-shadow: 0 0 10px rgba(255, 171, 0, 0.4); }
+    50%  { box-shadow: 0 0 25px rgba(255, 171, 0, 0.8); }
+    100% { box-shadow: 0 0 10px rgba(255, 171, 0, 0.4); }
+}
+
+@keyframes aparecer {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+section {
+    animation: aparecer 0.5s ease-out;
+}
+
+@keyframes deslizarAbajo {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* 
+   13. MEDIA QUERIES 3 breakpoints 
    
-   @media (max-width: XXpx) {
-       Se aplica cuando la pantalla es MENOR o IGUAL a XXpx
-   }
+   @media tipo-de-medio and (característica) { reglas }
    
-   Breakpoints (puntos de quiebre):
-   - Tablet: max-width: 768px
-   - Móvil: max-width: 480px
+   Breakpoints:
+   - Desktop grande: > 1024px (estilos base, sin media query)
+   - Tablet / Desktop pequeño: max-width: 1024px — NUEVO
+   - Tablet / Móvil: max-width: 768px
+   - Móvil pequeño: max-width: 480px
  */
 
-/*TABLET (pantallas hasta 768px de ancho)*/
-@media (max-width: 768px) {
+/* TABLET / DESKTOP PEQUEÑO (hasta 1024px)  */
+@media screen and (max-width: 1024px) {
 
-    /* El título se reduce */
-    header h1 {
-        font-size: 1.5em;
-    }
-
-    /* La navegación pasa a columna en vez de fila */
-    nav ul {
-        flex-direction: column;         /* Links uno debajo del otro */
-        gap: 10px;
-    }
-
-    /* Las secciones tienen menos padding */
     section {
-        margin: 15px 10px;
-        padding: 20px;
+        margin: var(--espaciado-lg) var(--espaciado-md);
     }
 
-    /* Las reglas pasan de 2 columnas a 1 */
-    .reglas-grid {
-        grid-template-columns: 1fr;     /* Solo 1 columna */
-    }
-
-    /* El stats panel se apila en columna */
     .stats-panel {
-        flex-direction: column;
-        gap: 10px;
+        gap: var(--espaciado-sm);
     }
 
-    /* Los botones se apilan */
+    /* clamp(min, preferido, max): tipografía fluida 
+       Mejor que cambiar font-size en cada breakpoint */
+    header h1 {
+        font-size: clamp(1.3em, 4vw, 2em);
+    }
+
+    section h2 {
+        font-size: clamp(1.3em, 3.5vw, 1.8em);
+    }
+}
+
+/*  TABLET (hasta 768px) */
+@media screen and (max-width: 768px) {
+
+    /* Mostrar menú hamburguesa */
+    .hamburguesa {
+        display: flex;
+    }
+
+    /* Nav oculto por defecto en móvil */
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        gap: var(--espaciado-sm);
+        width: 100%;
+        padding-top: var(--espaciado-md);
+    }
+
+    /* JS añade .activo → se muestra con animación */
+    .nav-links.activo {
+        display: flex;
+        animation: deslizarAbajo var(--transicion-normal) ease-out;
+    }
+
+    nav a {
+        display: block;
+        text-align: center;
+        padding: 12px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: var(--radio-borde-sm);
+    }
+
+    section {
+        margin: var(--espaciado-md) var(--espaciado-sm);
+        padding: var(--espaciado-lg);
+    }
+
+    /* Stats: Grid 3 cols --> 1 col */
+    .stats-panel {
+        grid-template-columns: 1fr;
+    }
+
     .controles {
         flex-direction: column;
         align-items: center;
     }
 
-    /* Las posiciones del tablero se hacen más pequeñas */
-    .posicion {
-        width: 40px;
-        height: 40px;
+    .btn {
+        width: 80%;
+        text-align: center;
+    }
+
+    /* Cambiar variable -> afecta a todo el tablero */
+    :root {
+        --tamano-ficha: 40px;
+        --gap-tablero: 6px;
     }
 }
 
-/*  MÓVIL (pantallas hasta 480px de ancho) */
-@media (max-width: 480px) {
+/*  MÓVIL PEQUEÑO (hasta 480px) */
+@media screen and (max-width: 480px) {
 
-    header h1 {
-        font-size: 1.2em;
+    :root {
+        --tamano-ficha: 35px;
+        --gap-tablero: 5px;
     }
 
-    section h2 {
-        font-size: 1.3em;
-    }
-
-    /* Las posiciones del tablero aún más pequeñas */
-    .posicion {
-        width: 35px;
-        height: 35px;
-    }
-
-    .fila {
-        gap: 5px;                       /* Menos espacio entre fichas */
-    }
-
-    /* La tabla se reduce */
     .tabla-ranking th,
     .tabla-ranking td {
         padding: 8px 4px;
         font-size: 0.8em;
     }
 
-    /* El formulario ocupa todo el ancho */
     .formulario {
-        padding: 15px;
+        padding: var(--espaciado-md);
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .stat-valor {
+        font-size: 1.2em;
+    }
+
+    .stat-label {
+        font-size: 0.75em;
+    }
+}
+
+
+/* 
+   14. PRINT STYLESHEET — @media print 
+   
+   tipo-de-medio: print → se aplica al imprimir (Ctrl+P)
+ */
+
+@media print {
+    body {
+        background-color: white;
+        color: black;
+    }
+
+    .hamburguesa, .controles, .formulario, nav, footer {
+        display: none !important;
+    }
+
+    section {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        page-break-inside: avoid;
+    }
+
+    header {
+        background-color: white;
+        color: black;
+        position: static;
+    }
+
+    .tabla-ranking th {
+        background-color: #ddd;
+        color: black;
+    }
+}
+
+
+/* 
+   15. REDUCED MOTION Accesibilidad 
+   
+   prefers-reduced-motion: reduce
+   Se activa cuando el usuario tiene configurado en su SO
+   que prefiere menos animaciones (epilepsia, migrañas, etc.)
+ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .posicion.seleccionada {
+        animation: none;
+        box-shadow: 0 0 15px rgba(255, 171, 0, 0.6);
     }
 }
