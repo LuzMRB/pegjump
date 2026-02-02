@@ -61,7 +61,7 @@ El juego consiste en un tablero triangular con **15 posiciones** dispuestas en 5
 | **UD3** — JavaScript y DOM | JavaScript ES6+ | Lógica del juego implementada con clases. Manipulación dinámica del DOM, manejo de eventos (`click`, `submit`, `keydown`) y validación de formularios. |
 | **UD4** — PHP y MySQL | PHP 8, MySQL, SQL | Backend con PHP para procesar solicitudes. Base de datos MySQL para almacenar puntuaciones. Consultas con `prepared statements` para prevenir SQL Injection. |
 | **UD5** — PHP OOP y Node.js | PHP (POO), Node.js, Express.js, npm | Refactorización del backend PHP con Programación Orientada a Objetos: clases `Modelo`, `Usuario` y `Puntuacion` con herencia y encapsulación. Reimplementación de la API con Node.js y Express.js conectando a MySQL. |
-| **UD6** — AJAX y Diseño Responsivo | Fetch API, JSON, CSS Media Queries | Comunicación asíncrona con el servidor mediante `fetch()` y `async/await`. Intercambio de datos en formato JSON. Diseño adaptable con media queries en 3 breakpoints (1024px, 768px, 480px). |
+| **UD6** — AJAX y Diseño Responsivo | Fetch API, JSON, XML, YAML, CSS Custom Properties, Media Queries | Comunicación asíncrona con el servidor mediante `fetch()` y `async/await`. Intercambio de datos en formato JSON. Diseño adaptable con media queries en 3 breakpoints (1024px, 768px, 480px). Menú hamburguesa, animaciones CSS y accesibilidad. |
 
 ---
 
@@ -80,9 +80,13 @@ Full_stack_proyect/
 ├── index.php               ← Página principal (session_start, nav condicional)
 ├── index.html              ← Página original HTML5
 ├── css/
-│   └── style.css           ← Estilos, responsive design y animaciones
+│   └── style.css           ← Estilos, responsive design, variables CSS y animaciones
 ├── js/
-│   └── script.js           ← Lógica del juego, DOM, eventos, Fetch API
+│   └── script.js           ← Lógica del juego, DOM, eventos, Fetch API, menú hamburguesa
+├── data/                   ← NUEVO (Clase 11 - Formatos de datos)
+│   ├── ranking_ejemplo.json    ← Ejemplo de datos en formato JSON
+│   ├── ranking_ejemplo.xml     ← Ejemplo de datos en formato XML
+│   └── ranking_ejemplo.yaml    ← Ejemplo de datos en formato YAML
 ├── php/
 │   ├── config.php          ← Configuración de BD (try-catch, 127.0.0.1)
 │   ├── clases/             ← NUEVO (Clase 9 - POO)
@@ -144,6 +148,332 @@ Deben aparecer todos los tests en verde.
 ### Paso 4: Acceder al juego
 ```
 http://localhost/Full_stack_proyect/index.php
+```
+
+---
+
+## Diseño Responsivo Avanzado (Clase 11 — UD6 §3)
+
+### CSS Custom Properties (Variables CSS)
+
+Se implementaron **más de 40 variables CSS** en el selector `:root` para centralizar todos los valores de diseño. Esto permite modificar el aspecto completo del sitio cambiando un solo valor, en lugar de buscar y reemplazar en cientos de líneas.
+
+```css
+:root {
+    --color-primario: #8b5e3c;
+    --color-fondo: #2c1810;
+    --espaciado-md: 15px;
+    --radio-borde: 8px;
+    --transicion-normal: all 0.3s ease;
+    --tamano-ficha: 50px;
+    /* ... más de 40 variables */
+}
+
+/* Uso en todo el CSS */
+background-color: var(--color-primario);
+border-radius: var(--radio-borde);
+transition: var(--transicion-normal);
+```
+
+**Categorías de variables implementadas:**
+
+| Categoría | Variables | Ejemplo |
+|---|---|---|
+| Colores | `--color-primario`, `--color-fondo`, `--color-texto`, etc. | `var(--color-primario)` → `#8b5e3c` |
+| Espaciado | `--espaciado-xs` a `--espaciado-xl` | `var(--espaciado-md)` → `15px` |
+| Bordes | `--radio-borde`, `--sombra-suave`, `--sombra-media` | `var(--radio-borde)` → `8px` |
+| Tipografía | `--fuente-principal`, `--tamano-base`, `--tamano-h1` | `var(--tamano-h1)` → `2em` |
+| Transiciones | `--transicion-rapida`, `--transicion-normal` | `var(--transicion-normal)` → `all 0.3s ease` |
+| Tablero | `--tamano-ficha`, `--gap-tablero` | `var(--tamano-ficha)` → `50px` |
+
+### Menú Hamburguesa
+
+Se implementó un **menú hamburguesa** para la navegación en dispositivos móviles (< 768px), con animación del icono ≡ → ✕ al abrirse.
+
+**HTML** (`index.php`):
+```html
+<button class="hamburguesa" id="btn-hamburguesa"
+        aria-label="Abrir menú de navegación"
+        aria-expanded="false">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+```
+
+**CSS** (`style.css`):
+```css
+/* Oculto en desktop, visible en móvil */
+.hamburguesa { display: none; }
+
+@media (max-width: 768px) {
+    .hamburguesa { display: flex; }
+    .nav-links { display: none; }
+    .nav-links.activo { display: flex; animation: deslizarAbajo 0.3s ease; }
+}
+```
+
+**JavaScript** (`script.js`):
+```javascript
+btnHamburguesa.addEventListener('click', () => {
+    btnHamburguesa.classList.toggle('activo');
+    navLinks.classList.toggle('activo');
+    btnHamburguesa.setAttribute('aria-expanded', estaAbierto);
+});
+```
+
+### 3 Breakpoints con Media Queries
+
+El diseño se adapta a **3 puntos de ruptura** para cubrir todos los tamaños de dispositivo:
+
+| Breakpoint | Dispositivo | Cambios principales |
+|---|---|---|
+| `≤ 1024px` | Tablet / Desktop pequeño | Tipografía fluida con `clamp()`, ajuste de paddings |
+| `≤ 768px` | Tablet / Móvil | Menú hamburguesa activo, Grid de 3 cols → 1 col, fichas más pequeñas |
+| `≤ 480px` | Móvil pequeño | Fichas aún más pequeñas, texto reducido, layout simplificado |
+
+**Tipografía fluida** (UD6 §3 — técnica avanzada):
+```css
+@media (max-width: 1024px) {
+    h1 { font-size: clamp(1.3em, 4vw, 2em); }
+}
+```
+La función `clamp(mínimo, preferido, máximo)` permite que el texto escale fluidamente con el ancho de la ventana, sin necesidad de definir un tamaño fijo para cada breakpoint.
+
+### CSS Grid Avanzado
+
+Se aplicaron técnicas avanzadas de CSS Grid más allá del uso básico:
+
+```css
+/* Grid auto-responsivo: se adapta SIN media queries */
+.reglas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--espaciado-md);
+}
+
+/* Grid fijo para el panel de estadísticas */
+.stats-panel {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--espaciado-sm);
+}
+```
+
+La combinación de `auto-fit` + `minmax()` permite que las tarjetas se redistribuyan automáticamente: en pantallas anchas aparecen 2 columnas, y en pantallas estrechas colapsan a 1 columna, sin necesitar una media query adicional.
+
+### Flexbox Avanzado
+
+Se mejoraron los layouts con Flexbox para adaptarse mejor a diferentes tamaños:
+
+```css
+/* Los botones saltan a nueva línea si no caben */
+.controles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espaciado-sm);
+    justify-content: center;
+}
+```
+
+La propiedad `flex-wrap: wrap` permite que los elementos se redistribuyan en múltiples líneas cuando no caben en una sola, combinado con `gap` para mantener el espaciado uniforme.
+
+### Animaciones CSS con @keyframes
+
+Se crearon 3 animaciones para mejorar la experiencia visual:
+
+| Animación | Elemento | Efecto |
+|---|---|---|
+| `@keyframes pulso` | Ficha seleccionada | Brillo dorado que pulsa (box-shadow) |
+| `@keyframes aparecer` | Secciones de la página | Aparecen con fade-in + desplazamiento desde abajo |
+| `@keyframes deslizarAbajo` | Menú hamburguesa | Se desliza hacia abajo al abrirse |
+
+```css
+@keyframes pulso {
+    0%, 100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+}
+
+.ficha.seleccionada {
+    animation: pulso 1.5s ease-in-out infinite;
+}
+```
+
+### Hoja de Estilos para Impresión
+
+Se añadió un bloque `@media print` que adapta la página para ser impresa:
+
+```css
+@media print {
+    body { background: white; color: black; }
+    nav, .controles, .formulario-puntuacion, footer { display: none; }
+    section { page-break-inside: avoid; }
+}
+```
+
+Esto oculta los elementos interactivos (menú, botones, formulario) y optimiza colores para ahorro de tinta al imprimir con `Ctrl+P`.
+
+### Accesibilidad
+
+Se implementaron mejoras de accesibilidad según las buenas prácticas de la UD6:
+
+**`prefers-reduced-motion`**: Desactiva todas las animaciones para usuarios que lo tienen configurado en su sistema operativo.
+```css
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+```
+
+**Atributos ARIA**: El menú hamburguesa incluye `aria-label` para describir el botón y `aria-expanded` que se actualiza con JavaScript para indicar si el menú está abierto o cerrado.
+
+**Tabla responsiva**: Se envolvió la tabla de ranking en un wrapper con `overflow-x: auto` para permitir scroll horizontal en pantallas pequeñas sin romper el layout.
+
+### Otras mejoras responsivas
+
+| Mejora | Técnica CSS | Propósito |
+|---|---|---|
+| Imágenes flexibles | `img { max-width: 100%; height: auto; }` | Las imágenes nunca desbordan su contenedor |
+| Header fijo | `header { position: sticky; top: 0; }` | El header permanece visible al hacer scroll |
+| Botones adaptables | `.controles { flex-wrap: wrap; }` | Los botones saltan a nueva línea si no caben |
+| Hover mejorado | `.regla-card:hover { transform: translateY(-3px); }` | Feedback visual al pasar el ratón |
+
+### Resumen de conceptos UD6 §3 aplicados
+
+| Concepto | Implementación |
+|---|---|
+| CSS Custom Properties | `:root` con ~40 variables, `var()` en todo el CSS |
+| Flexbox avanzado | `flex-wrap: wrap`, `gap`, distribución responsiva |
+| CSS Grid avanzado | `repeat(auto-fit, minmax())`, `repeat(3, 1fr)` |
+| Media Queries (3 breakpoints) | 1024px, 768px, 480px |
+| Menú hamburguesa | HTML + CSS + JS con animación ≡ → ✕ |
+| Animaciones @keyframes | pulso, aparecer, deslizarAbajo |
+| Tipografía fluida | `clamp(1.3em, 4vw, 2em)` |
+| Imágenes flexibles | `max-width: 100%; height: auto` |
+| position: sticky | Header fijo al scroll |
+| Tabla responsiva | `overflow-x: auto` en wrapper |
+| @media print | Estilos optimizados para impresión |
+| prefers-reduced-motion | Respeto de preferencias de accesibilidad |
+| ARIA attributes | `aria-label`, `aria-expanded` en hamburguesa |
+
+---
+
+## Formatos de Intercambio de Datos (Clase 11 — UD6 §4)
+
+### ¿Qué son los formatos de intercambio de datos?
+
+Son formatos estandarizados que permiten que diferentes sistemas (frontend, backend, APIs, servicios externos) intercambien información de forma estructurada. En el proyecto se crearon ejemplos comparativos con los mismos datos de ranking en los 3 formatos principales.
+
+Los archivos de ejemplo se encuentran en la carpeta `data/`.
+
+### JSON (JavaScript Object Notation) — `data/ranking_ejemplo.json`
+
+Es el formato **más utilizado en aplicaciones web** actuales. Su sintaxis es idéntica a los objetos de JavaScript, lo que facilita su uso en el frontend.
+
+```json
+{
+    "ranking": [
+        {
+            "posicion": 1,
+            "nombre": "Ana García",
+            "puntuacion": 9500
+        }
+    ]
+}
+```
+
+**Características:**
+- Pares `"clave": valor` separados por comas
+- Objetos delimitados por `{ }`, arrays por `[ ]`
+- Tipos de datos: string, number, boolean, null, object, array
+- Ligero y fácil de parsear
+
+**Uso en el proyecto:**
+- El frontend envía datos con `JSON.stringify()` en las peticiones `fetch()`
+- El backend PHP responde con `json_encode()` y `header('Content-Type: application/json')`
+- Node.js usa `JSON.parse()` para leer y `res.json()` para responder
+
+### XML (eXtensible Markup Language) — `data/ranking_ejemplo.xml`
+
+Formato con etiquetas similar a HTML, muy usado en sistemas empresariales y tecnologías más antiguas (SOAP, RSS, configuraciones de Java/Android).
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<ranking>
+    <jugador posicion="1">
+        <nombre>Ana García</nombre>
+        <puntuacion>9500</puntuacion>
+    </jugador>
+</ranking>
+```
+
+**Características:**
+- Declaración `<?xml ?>` obligatoria al inicio
+- Etiquetas de apertura `<tag>` y cierre `</tag>`
+- Soporta atributos dentro de las etiquetas
+- Extensible: puedes definir tus propias etiquetas
+- Más verbose (ocupa más espacio que JSON)
+
+### YAML (YAML Ain't Markup Language) — `data/ranking_ejemplo.yaml`
+
+Formato basado en **sangrado** (indentación), sin llaves ni corchetes. Es el más legible por humanos y se usa principalmente en archivos de configuración.
+
+```yaml
+ranking:
+  - posicion: 1
+    nombre: "Ana García"
+    puntuacion: 9500
+```
+
+**Características:**
+- Estructura definida por la indentación (espacios, no tabuladores)
+- Sin llaves `{}`, corchetes `[]` ni comillas obligatorias
+- Listas con guion `-`
+- Muy usado en: Docker Compose, Kubernetes, GitHub Actions, configuraciones
+
+### Comparativa de formatos
+
+| Aspecto | JSON | XML | YAML |
+|---|---|---|---|
+| **Legibilidad** | Media | Baja (verbose) | Alta |
+| **Tamaño** | Ligero | Pesado (~2x JSON) | Ligero |
+| **Uso principal** | APIs REST, web | Empresarial, SOAP, RSS | Configuración, DevOps |
+| **Soporte en JS** | Nativo (`JSON.parse`) | Necesita parser (DOMParser) | Necesita librería externa |
+| **Tipos de datos** | string, number, bool, null, array, object | Solo texto (todo es string) | string, number, bool, null, array, object |
+| **Comentarios** | No soporta | Sí (`<!-- -->`) | Sí (`#`) |
+
+### JSON en el proyecto: flujo completo
+
+```
+[Frontend JS]                    [Backend PHP]
+     |                                |
+     |  fetch('/php/process.php', {   |
+     |    method: 'POST',             |
+     |    body: JSON.stringify({      |  ← JSON.stringify() convierte
+     |      nombre: "Ana",            |     objeto JS → texto JSON
+     |      puntuacion: 9500          |
+     |    })                          |
+     |  })                            |
+     |  ────────────────────────────> |
+     |                                |  $datos = json_decode(
+     |                                |    file_get_contents('php://input'),
+     |                                |    true
+     |                                |  );  ← json_decode() convierte
+     |                                |        texto JSON → array PHP
+     |                                |
+     |                                |  // Procesa y guarda en MySQL...
+     |                                |
+     |                                |  echo json_encode([
+     |                                |    'exito' => true
+     |                                |  ]);  ← json_encode() convierte
+     |  <──────────────────────────── |        array PHP → texto JSON
+     |                                |
+     |  .then(res => res.json())      |
+     |  .then(data => {               |  ← res.json() convierte
+     |    console.log(data.exito);    |     texto JSON → objeto JS
+     |  })                            |
 ```
 
 ---
