@@ -784,3 +784,23 @@ section {
         box-shadow: 0 0 15px rgba(255, 171, 0, 0.6);
     }
 }
+
+
+/* ============================================================
+   16. CLASE 12: Estilos para carga asincrona (UD6 §5)
+   ============================================================
+   Feedback visual para operaciones AJAX:
+   - Boton deshabilitado mientras se envia
+   - Texto "Cargando..." en tabla de ranking
+   ============================================================ */
+
+#btn-refrescar-ranking {
+    font-size: 0.9em;
+    padding: 8px 20px;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
