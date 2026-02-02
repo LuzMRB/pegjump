@@ -1,0 +1,57 @@
+# 
+# Ejemplo de datos de ranking en formato YAML 
+#
+# YAML (YAML Ain't Markup Language):
+# - Se basa en SANGRADO (indentación) para estructura
+# - NO necesita llaves {}, corchetes [] ni comillas ""
+# - Más legible y compacto que JSON y XML
+# - Usado típicamente para configuración (Docker, Kubernetes)
+#
+# Componentes:
+# - Comentarios: líneas que empiezan con #
+# - Pares clave: valor (separados por dos puntos y espacio)
+# - Listas: elementos precedidos por guión -
+# - Anidamiento: definido por sangrado (espacios)
+# - Sin comillas para cadenas de texto simples
+#
+# Comparación con JSON y XML:
+# - YAML: ranking:\n  - jugador: Ana     (sangrado)
+# - JSON: {"ranking": [{"jugador": "Ana"}]} (llaves, comillas)
+# - XML:  <ranking><jugador>Ana</jugador></ranking> (etiquetas)
+# 
+descripcion: Ejemplo de datos de ranking en formato YAML
+formato: YAML (YAML Ain't Markup Language)
+
+ventajas:
+  - Legibilidad superior a JSON y XML
+  - Sintaxis basada en sangrado, sin caracteres especiales
+  - Ideal para archivos de configuración
+  - Usado en Docker Compose y Kubernetes
+
+uso_en_proyecto:
+  nota: >
+    En nuestro proyecto usamos JSON porque es el formato
+    estándar para APIs web y JavaScript lo parsea nativamente.
+    YAML se usa más para configuración de servidores.
+
+ranking:
+  - posicion: 1
+    jugador: Ana García
+    fichas_restantes: 1
+    movimientos: 13
+    tiempo_segundos: 120
+    puntuacion: 9500
+
+  - posicion: 2
+    jugador: Carlos López
+    fichas_restantes: 1
+    movimientos: 15
+    tiempo_segundos: 180
+    puntuacion: 8200
+
+  - posicion: 3
+    jugador: María Ruiz
+    fichas_restantes: 2
+    movimientos: 12
+    tiempo_segundos: 95
+    puntuacion: 7800
