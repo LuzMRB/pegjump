@@ -1,4 +1,7 @@
 <?php
+// session_start(): OBLIGATORIO antes de usar $_SESSION (UD5 §3.3)
+// Debe ir ANTES de cualquier salida HTML o require
+session_start();
 
 // INDEX.PHP Página Principal del Solitario 
 
@@ -15,10 +18,16 @@
 //   - La tabla del ranking se rellena con datos REALES de la BD
 //   - El formulario envía datos a process.php
 //   - Se usa PHP para generar HTML dinámicamente
+//   - $_SESSION permite saber si el usuario está logueado (Clase 8)
 
 
 // Incluir la configuración de la BD para cargar el ranking
 require_once __DIR__ . '/php/config.php';
+
+// Comprobar si el usuario está logueado ($_SESSION)
+// isset(): Comprueba si una variable existe y no es NULL
+$estaLogueado = isset($_SESSION['logueado']) && $_SESSION['logueado'] === true;
+$nombreUsuario = $estaLogueado ? $_SESSION['usuario_nombre'] : '';
 
 // CARGAR DATOS DEL RANKING DESDE LA BASE DE DATOS
 
@@ -77,6 +86,19 @@ mysqli_close($conexion);
                     <li><a href="#juego">Juego</a></li>
                     <li><a href="#reglas">Reglas</a></li>
                     <li><a href="#ranking">Ranking</a></li>
+                    <?php if ($estaLogueado): ?>
+                        <!--
+                            Si el usuario está logueado, mostramos su nombre
+                            y un enlace para cerrar sesión.
+                            htmlspecialchars(): SIEMPRE sanitizar datos que
+                            vienen de $_SESSION antes de mostrarlos (UD5 §3.6)
+                        -->
+                        <li><a href="php/logout.php">Cerrar sesión (<?php echo htmlspecialchars($nombreUsuario, ENT_QUOTES, 'UTF-8'); ?>)</a></li>
+                    <?php else: ?>
+                        <!-- Si NO está logueado, enlaces a registro y login -->
+                        <li><a href="php/login.php">Login</a></li>
+                        <li><a href="php/registro.php">Registro</a></li>
+                    <?php endif; ?>
                 </ul>
             </nav>
         </div>
@@ -184,13 +206,35 @@ mysqli_close($conexion);
             -->
             <form id="form-puntuacion" class="formulario">
                 <h3>Guardar tu puntuación</h3>
+
+                <?php
+               
+                // INTEGRACIÓN CON SESIONES 
+                // Si el usuario está logueado, mostramos un mensaje
+                // de bienvenida y pre-rellenamos el nombre.
+                // Esto mejora la experiencia del usuario.
+             
+                if ($estaLogueado):
+                ?>
+                <div style="background-color: #e8f5e9; padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center;">
+                    Jugando como <strong><?php echo htmlspecialchars($nombreUsuario, ENT_QUOTES, 'UTF-8'); ?></strong>
+                </div>
+                <?php endif; ?>
+
                 <div class="form-grupo">
                     <label for="nombre">Nombre:</label>
-                    <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required minlength="2"
-                        maxlength="50">
+                    <input type="text" id="nombre" name="nombre"
+                        placeholder="Tu nombre" required minlength="2" maxlength="50"
+                        value="<?php echo $estaLogueado ? htmlspecialchars($nombreUsuario, ENT_QUOTES, 'UTF-8') : ''; ?>"
+                        <?php echo $estaLogueado ? 'readonly' : ''; ?>>
+                    <!--
+                        Si está logueado:
+                        - value="nombre": Se pre-rellena con el nombre de la sesión
+                        - readonly: No se puede editar (ya sabemos quién es)
+                        - htmlspecialchars(): SIEMPRE sanitizar la salida
+                    -->
                     <span class="mensaje-error" id="error-nombre"></span>
                 </div>
-
                 <div class="form-grupo">
                     <label for="email">Email (opcional):</label>
                     <input type="email" id="email" name="email" placeholder="tu@email.com">
