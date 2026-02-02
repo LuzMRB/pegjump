@@ -5,8 +5,6 @@
 // NOTA: Este archivo es solo para desarrollo/pruebas.
 
  ?> 
-
-?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

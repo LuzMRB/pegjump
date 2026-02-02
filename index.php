@@ -59,9 +59,9 @@ mysqli_close($conexion);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Juego de Solitario Triangular - Proyecto Full Stack para Ingeniería Web I">
+    <meta name="description" content="Juego del Solitario  - Proyecto Full Stack para Ingeniería Web I">
     <meta name="author" content="Luz Rubio Bolger">
-    <title>Solitario Triangular | Luz Rubio Bolger</title>
+    <title>Solitario | Luz Rubio Bolger</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -239,9 +239,9 @@ mysqli_close($conexion);
                 </thead>
                 <tbody id="ranking-body">
                     <?php
-                    // -------------------------------------------------------
+                    
                     // GENERAR FILAS DEL RANKING CON PHP
-                    //
+                    
                     // foreach: Recorre cada elemento del array $ranking (UD5)
                     // $indice: Posición en el array (0, 1, 2...)
                     // $fila: Datos de cada puntuación (array asociativo)
@@ -251,7 +251,7 @@ mysqli_close($conexion);
                     // Esto PREVIENE ataques XSS (Cross-Site Scripting)
                     // donde un atacante podría inyectar HTML/JS malicioso
                     // a través del nombre de usuario.
-                    // -------------------------------------------------------
+                 
 
                     if (count($ranking) > 0) {
                         foreach ($ranking as $indice => $fila) {
