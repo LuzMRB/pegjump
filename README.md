@@ -124,11 +124,11 @@ Abrir en el navegador:
 ```
 http://localhost/Full_stack_proyect/php/test_conexion.php
 ```
-Deben aparecer todos los tests en verde (✅).
+Deben aparecer todos los tests en verde.
 
 ### Paso 4: Acceder al juego
 ```
-http://localhost/solitario/index.php
+http://127.0.0.1:5500/index.html
 ```
 
 ## Conceptos UD4/UD5 Aplicados
@@ -153,7 +153,7 @@ http://localhost/solitario/index.php
 - `mysqli_stmt_execute()`: ejecuta consultas preparadas
 - `mysqli_close()`: cierra la conexión
 
-### Seguridad (UD5 §3.6)
+### Seguridad 
 - **Consultas preparadas**: previenen inyección SQL
 - **password_hash()**: hasheo seguro de contraseñas (bcrypt)
 - **password_verify()**: verificación de contraseñas
