@@ -640,6 +640,11 @@ formPuntuacion.addEventListener('submit', validarFormulario);
 inicializarJuego();
 console.log(' Solitario — JS cargado correctamente');
 
+// Cargar el ranking desde el servidor 
+// Si el servidor no está disponible, se mantienen los datos
+// que PHP ya generó al cargar la página.
+cargarRanking();
+
 //  EVENT LISTENERS DE VALIDACIÓN EN TIEMPO REAL
 
 // Evento 'blur': se dispara cuando el usuario SALE del campo
