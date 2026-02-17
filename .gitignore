@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Contraseñas y datos sensibles
+.env
+.env.*
+!.env.example
+*.local.php
+config.local.php
+*.local.js
+*credentials*
+*secrets*
+*.pem
+*.key
+
+# Node.js (por si se instalan dependencias en la raíz)
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Archivos de IDE/editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
