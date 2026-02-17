@@ -131,7 +131,7 @@
 }
 
 html {
-    scroll-padding-top: 140px;
+    scroll-padding-top: 20px;
 }
 
 /* ── Fondo negro con puntitos blancos ── */
@@ -174,8 +174,7 @@ header {
     padding-top: 60px;
     padding-bottom: 20px;
     text-align: center;
-    position: sticky;
-    top: 0;
+    position: relative;
     z-index: 10;
 }
 
@@ -304,9 +303,8 @@ section h2 {
     letter-spacing: 0.02em;
 }
 
-/* Evitar que el header sticky tape el tablero al hacer clic en "Juego" */
 section#juego {
-    scroll-margin-top: 140px;
+    scroll-margin-top: 20px;
 }
 
 section#juego h2 {
