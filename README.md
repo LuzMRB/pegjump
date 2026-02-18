@@ -112,6 +112,59 @@ Full_stack_proyect/
 
 ---
 
+## Enrutamiento Node.js (Express)
+
+El backend Node.js usa **Express.js** con rutas modulares bajo el prefijo `/api`.
+
+### Framework elegido
+- **Express.js** (ya incluido en `nodejs/package.json`).
+
+### Mapa de rutas
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/api/health` | Estado general del servidor y salud de BD |
+| GET | `/api/ranking` | Top 10 puntuaciones |
+| POST | `/api/ranking` | Guarda una nueva puntuación |
+| POST | `/api/auth/register` | Registro de usuario |
+| POST | `/api/auth/login` | Inicio de sesión |
+| POST | `/api/auth/logout` | Cierre de sesión |
+
+Rutas de compatibilidad heredadas:
+- `GET /api/estado` (alias de health)
+- `POST /api/puntuacion` (alias de crear ranking)
+
+### Estructura de código
+```
+nodejs/
+├── server.js
+├── db.js
+├── routes/
+│   ├── health.js
+│   ├── ranking.js
+│   └── auth.js
+└── controllers/
+    ├── healthController.js
+    ├── rankingController.js
+    └── authController.js
+```
+
+### Ejecutar y probar
+Desde `nodejs/`:
+```bash
+npm start
+```
+
+Pruebas rápidas:
+```bash
+curl http://127.0.0.1:3000/api/health
+curl http://127.0.0.1:3000/api/ranking
+```
+
+Si MySQL no está disponible, el servidor seguirá arrancando y responderá JSON de error en rutas que dependen de base de datos.
+
+---
+
 ## Instalación y Configuración (Clase 7)
 
 ### Requisitos Previos
