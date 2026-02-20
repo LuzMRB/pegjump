@@ -44,12 +44,6 @@
         </div>
     </header>
     <p class="subtitulo" data-i18n="subtitle">¿Podrás resolver este puzle?</p>
-    <nav>
-        <ul class="nav-links" id="nav-links">
-            <li><a href="#juego" data-i18n="navGame">Juego</a></li>
-            <li><a href="#" id="nav-reglas" data-i18n="navRules">Reglas</a></li>
-        </ul>
-    </nav>
 
     <!-- MAIN -->
     <main>
@@ -125,32 +119,6 @@
         </section>
 
     </main>
-
-    <!-- Modal de Reglas -->
-    <div id="rules-modal" class="modal-overlay" aria-hidden="true">
-        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="rules-title">
-            <button class="modal-close" type="button" data-i18n="ariaCloseRules" data-i18n-attr="aria-label">×</button>
-            <h2 id="rules-title" data-i18n="rulesTitle">Reglas del Juego</h2>
-            <div class="reglas-grid">
-                <div class="regla-card">
-                    <h3><span class="regla-num">01</span><span class="regla-title" data-i18n="rulesRule1Title">Objetivo</span></h3>
-                    <p data-i18n="rulesRule1Text">Eliminar todas las fichas del tablero hasta dejar solo una.</p>
-                </div>
-                <div class="regla-card">
-                    <h3><span class="regla-num">02</span><span class="regla-title" data-i18n="rulesRule2Title">Movimiento</span></h3>
-                    <p data-i18n="rulesRule2Text">Una ficha salta sobre otra adyacente y aterriza en un hueco vacío.</p>
-                </div>
-                <div class="regla-card">
-                    <h3><span class="regla-num">03</span><span class="regla-title" data-i18n="rulesRule3Title">Captura</span></h3>
-                    <p data-i18n="rulesRule3Text">La ficha saltada se elimina del tablero automáticamente.</p>
-                </div>
-                <div class="regla-card">
-                    <h3><span class="regla-num">04</span><span class="regla-title" data-i18n="rulesRule4Title">Fin</span></h3>
-                    <p data-i18n="rulesRule4Text">La partida termina cuando no quedan movimientos posibles.</p>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- FOOTER -->
     <footer>

@@ -309,71 +309,6 @@ header h1 {
     margin-bottom: clamp(8px, 1vh, 10px);
 }
 
-/* Navegación con Flexbox  */
-nav ul {
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    gap: var(--espaciado-lg);
-    margin-bottom: 2px;
-}
-
-nav a {
-    color: rgba(31, 41, 55, 0.88);
-    text-decoration: none;
-    font-weight: 500;
-    padding: var(--espaciado-sm) 14px;
-    border-radius: 999px;
-    position: relative;
-    transition: color var(--transicion-normal);
-}
-
-nav a:hover {
-    color: #34c759;
-}
-
-/* ── MENÚ HAMBURGUESA  
-   Botón con 3 <span> que forman las líneas ≡
-   Solo visible en pantallas < 768px (ver Media Queries)
-   JS añade/quita la clase .activo para mostrar/ocultar nav */
-
-.hamburguesa {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    cursor: pointer;
-    padding: var(--espaciado-sm);
-    background: none;
-    border: none;
-    position: absolute;
-    right: var(--espaciado-lg);
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 101;
-}
-
-.hamburguesa span {
-    display: block;
-    width: 28px;
-    height: 3px;
-    background-color: var(--ui-text);
-    border-radius: 2px;
-    transition: transform var(--transicion-normal),
-                opacity var(--transicion-normal);
-}
-
-/* Animación ≡  cuando está activo */
-.hamburguesa.activo span:nth-child(1) {
-    transform: translateY(8px) rotate(45deg);
-}
-.hamburguesa.activo span:nth-child(2) {
-    opacity: 0;
-}
-.hamburguesa.activo span:nth-child(3) {
-    transform: translateY(-8px) rotate(-45deg);
-}
-
-
 /* 
    4. SECCIONES PRINCIPALES
 */
@@ -705,150 +640,6 @@ section#juego > p {
 
 
 /* 
-   8. REGLAS DEL JUEGO — CSS Grid auto-fit (UD6 §3)
-   
-   auto-fit + minmax() crea un grid AUTO-RESPONSIVO:
-   - auto-fit: crea tantas columnas como quepan
-   - minmax(250px, 1fr): mínimo 250px, máximo fracción igual
-   
-   Resultado:
-   - Desktop: 2 columnas (si hay espacio para 2 × 250px)
-   - Móvil: 1 columna automáticamente (sin media query)
-*/
-
-.reglas-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin-top: 8px;
-}
-
-.regla-card {
-    background: transparent;
-    padding: 12px 0;
-    border-radius: 0;
-    border: none;
-    border-bottom: 1px solid rgba(170, 181, 197, 0.25);
-    transition: none;
-}
-
-.regla-card:hover {
-    transform: none;
-    box-shadow: none;
-}
-
-.regla-card h3 {
-    margin-bottom: 6px;
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-}
-
-.regla-num {
-    font-size: 1.08rem;
-    font-weight: 600;
-    color: #a4acb7;
-    letter-spacing: 0.08em;
-}
-
-.regla-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #2F343A;
-}
-
-.regla-card p {
-    color: #6B7076;
-    font-size: 0.94rem;
-    line-height: 1.55;
-}
-
-
-/* 
-   9. MODAL DE REGLAS
- */
-
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(225, 227, 230, 0.35);
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-.modal-overlay.is-open {
-    opacity: 1;
-    pointer-events: all;
-}
-
-.modal-dialog {
-    background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border-radius: 26px;
-    padding: 34px 34px 28px;
-    max-width: 560px;
-    width: min(90vw, 560px);
-    max-height: 85vh;
-    overflow-y: auto;
-    box-shadow: 0 30px 70px rgba(16, 24, 40, 0.16);
-    position: relative;
-    transform: scale(0.95);
-    transition: transform 0.3s ease;
-}
-
-.modal-overlay.is-open .modal-dialog {
-    transform: scale(1);
-}
-
-.modal-close {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 34px;
-    height: 34px;
-    border: 1px solid rgba(188, 196, 208, 0.92);
-    background: radial-gradient(circle at 30% 24%, var(--ui-peg-light) 0%, var(--ui-peg-mid) 56%, var(--ui-peg-dark) 100%);
-    font-size: 1.25rem;
-    line-height: 1;
-    color: var(--ui-text);
-    cursor: pointer;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.85),
-        0 6px 10px rgba(16, 24, 40, 0.1);
-}
-
-.modal-close:hover {
-    transform: translateY(-1px);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.9),
-        0 8px 12px rgba(16, 24, 40, 0.12);
-}
-
-.modal-dialog h2 {
-    margin-bottom: 18px;
-    color: #2F343A;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-}
-
-.modal-dialog .reglas-grid {
-    margin-top: 0;
-}
-
-/* 
    10. FORMULARIO
  */
 
@@ -1011,12 +802,6 @@ section:not(#juego) {
     animation: aparecer 0.5s ease-out;
 }
 
-@keyframes deslizarAbajo {
-    from { opacity: 0; transform: translateY(-10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-
 /* 
    13. MEDIA QUERIES 3 breakpoints 
    
@@ -1062,34 +847,6 @@ section:not(#juego) {
         transform: translateY(0);
     }
 
-    /* Mostrar menú hamburguesa */
-    .hamburguesa {
-        display: flex;
-    }
-
-    /* Nav oculto por defecto en móvil */
-    .nav-links {
-        display: none;
-        flex-direction: column;
-        gap: var(--espaciado-sm);
-        width: 100%;
-        padding-top: var(--espaciado-md);
-    }
-
-    /* JS añade .activo → se muestra con animación */
-    .nav-links.activo {
-        display: flex;
-        animation: deslizarAbajo var(--transicion-normal) ease-out;
-    }
-
-    nav a {
-        display: block;
-        text-align: center;
-        padding: 12px;
-        background-color: rgba(255, 255, 255, 0.65);
-        border-radius: var(--radio-borde-sm);
-    }
-
     section {
         margin: 0 auto;
         padding: clamp(8px, 1.4vh, 14px);
@@ -1129,11 +886,6 @@ section:not(#juego) {
     
     .control-icon {
         font-size: 1.4rem;
-    }
-    
-    .modal-dialog {
-        padding: 32px 24px;
-        max-width: 95vw;
     }
 }
 
@@ -1213,7 +965,7 @@ section:not(#juego) {
         color: black;
     }
 
-    .hamburguesa, .controles, .formulario, nav, footer {
+    .controles, .formulario, footer {
         display: none !important;
     }
 
