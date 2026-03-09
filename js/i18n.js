@@ -47,6 +47,9 @@
     applyTranslations(lang);
     updateLangSelector(lang);
     updateOnboardingTooltip(lang);
+    if (document.body.classList.contains('modo-tutorial') && typeof window.refrescarTextosTutorial === 'function') {
+      window.refrescarTextosTutorial();
+    }
   }
 
   function updateOnboardingTooltip(lang) {
@@ -80,10 +83,24 @@
     return text;
   }
 
+  function getTranslation(key) {
+    const t = window.TRANSLATIONS && window.TRANSLATIONS[currentLang];
+    return t && t[key] ? t[key] : key;
+  }
+
+  function applyTutorialText(key) {
+    var el = document.getElementById('tutorial-text');
+    if (!el || !key) return;
+    el.setAttribute('data-i18n', key);
+    el.textContent = getTranslation(key);
+  }
+
   window.i18n = {
     setLanguage: setLanguage,
     getLang: function () { return currentLang; },
-    getTranslatedAlert: getTranslatedAlert
+    getTranslatedAlert: getTranslatedAlert,
+    getTranslation: getTranslation,
+    applyTutorialText: applyTutorialText
   };
 
   if (document.readyState === 'loading') {
