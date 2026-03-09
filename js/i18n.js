@@ -47,6 +47,13 @@
     applyTranslations(lang);
     updateLangSelector(lang);
     updateOnboardingTooltip(lang);
+    if (document.body.classList.contains('modo-tutorial')) {
+      if (typeof window.actualizarTodoTextosTutorial === 'function') window.actualizarTodoTextosTutorial();
+      if (typeof window.actualizarTextoTutorial === 'function') {
+        const paso = typeof window.getTutorialPaso === 'function' ? window.getTutorialPaso() : 0;
+        window.actualizarTextoTutorial(paso);
+      }
+    }
   }
 
   function updateOnboardingTooltip(lang) {

@@ -32,6 +32,20 @@ let onboardingPegIndex = null;
 let onboardingHoleIndex = null;
 let onboardingCompletedThisSession = false;
 
+let modoActual = 'tutorial';
+let tutorialPaso = 0;
+let tutorialEstado = [1, 1, 0];
+let tutorialFichaSeleccionada = null;
+
+const TUTORIAL_KEY = 'pegjump_tutorial_completado';
+const TUTORIAL_ESTADO_INICIAL = [1, 1, 0];
+const TUTORIAL_CONEXIONES = { 0: [{ destino: 2, intermedia: 1 }] };
+
+const TUTORIAL_TEXTOS = {
+    es: { tutorial_title: "Cómo jugar", tutorial_step_0: "Una ficha salta sobre otra", tutorial_step_1: "Tu turno — toca la ficha", tutorial_step_2: "La ficha saltada desaparece", tutorial_step_3: "Objetivo: deja solo una ficha", tutorial_play: "Jugar", tutorial_skip: "Saltar", tutorial_repeat: "Repetir tutorial" },
+    en: { tutorial_title: "How to play", tutorial_step_0: "A peg jumps over another", tutorial_step_1: "Your turn — tap the peg", tutorial_step_2: "The jumped peg disappears", tutorial_step_3: "Goal: leave only one peg", tutorial_play: "Play", tutorial_skip: "Skip", tutorial_repeat: "Replay tutorial" }
+};
+
 //  MAPA DE CONEXIONES 
 // Objeto: cada posición tiene un array de movimientos posibles
 // Cada movimiento es [posición_intermedia, posición_destino]
@@ -144,6 +158,190 @@ const btnReiniciar = document.getElementById('btn-reiniciar');
 const btnDeshacer = document.getElementById('btn-deshacer');
 const btnPista = document.getElementById('btn-pista');
 
+const tutorialTextEl = document.getElementById('tutorial-text');
+const btnTutorialPlay = document.getElementById('btn-tutorial-play');
+const btnTutorialRepeat = document.getElementById('btn-tutorial-repeat');
+const btnTutorialSkip = document.getElementById('btn-tutorial-skip');
+
+function getTutorialPosElements() { return document.querySelectorAll('.tutorial-board .tutorial-pos'); }
+
+function obtenerIdiomaActual() {
+    if (window.i18n && typeof window.i18n.getLang === 'function') return window.i18n.getLang();
+    if (document.documentElement.lang) return document.documentElement.lang;
+    const active = document.querySelector('[data-lang].active');
+    if (active) return active.getAttribute('data-lang');
+    const stored = localStorage.getItem('pegjump-lang');
+    if (stored === 'es' || stored === 'en') return stored;
+    return 'es';
+}
+
+function textoTutorial(clave) {
+    const lang = obtenerIdiomaActual();
+    return TUTORIAL_TEXTOS[lang]?.[clave] || TUTORIAL_TEXTOS.es[clave] || clave;
+}
+
+function actualizarTextoTutorial(paso) {
+    const el = document.querySelector('.tutorial-text');
+    if (!el) return;
+    el.style.opacity = '0';
+    setTimeout(() => { el.textContent = textoTutorial('tutorial_step_' + paso); el.style.opacity = '1'; }, 400);
+}
+
+function actualizarTodoTextosTutorial() {
+    const titulo = document.querySelector('.tutorial-title');
+    if (titulo) titulo.textContent = textoTutorial('tutorial_title');
+    if (document.querySelector('.tutorial-btn-play')) document.querySelector('.tutorial-btn-play').textContent = textoTutorial('tutorial_play');
+    if (document.querySelector('.tutorial-btn-skip')) document.querySelector('.tutorial-btn-skip').textContent = textoTutorial('tutorial_skip');
+    if (document.querySelector('.tutorial-btn-repeat')) document.querySelector('.tutorial-btn-repeat').textContent = textoTutorial('tutorial_repeat');
+}
+
+function refrescarTextosTutorialPorIdioma() { actualizarTodoTextosTutorial(); actualizarTextoTutorial(tutorialPaso); }
+window.refrescarTextosTutorial = refrescarTextosTutorialPorIdioma;
+window.actualizarTodoTextosTutorial = actualizarTodoTextosTutorial;
+window.actualizarTextoTutorial = actualizarTextoTutorial;
+window.getTutorialPaso = () => tutorialPaso;
+
+function renderTutorialBoard(estado) {
+    const els = getTutorialPosElements();
+    els.forEach((el, i) => {
+        el.classList.remove('tutorial-ficha', 'tutorial-hueco', 'tutorial-pulse', 'tutorial-destino-glow', 'tutorial-atenuada', 'tutorial-desaparecer', 'tutorial-ficha-mover', 'tutorial-ficha-origen', 'tutorial-ficha-intermedia', 'tutorial-hueco-destino');
+        el.classList.add(estado[i] === 1 ? 'tutorial-ficha' : 'tutorial-hueco');
+    });
+}
+
+function actualizarDotsTutorial(pasoActivo) {
+    const ind = document.getElementById('tutorial-steps-indicator');
+    if (!ind) return;
+    ind.querySelectorAll('.tutorial-dot').forEach((d, i) => d.classList.toggle('active', i === pasoActivo));
+}
+
+function mostrarBotonesTutorial(paso) {
+    if (btnTutorialPlay) btnTutorialPlay.style.display = paso === 3 ? 'block' : 'none';
+    if (btnTutorialRepeat) btnTutorialRepeat.style.display = paso === 3 ? 'inline' : 'none';
+    if (btnTutorialSkip) btnTutorialSkip.style.display = paso === 3 ? 'none' : 'block';
+}
+
+function irAJuego() {
+    localStorage.setItem(TUTORIAL_KEY, 'true');
+    modoActual = 'game';
+    document.body.classList.remove('modo-tutorial');
+    document.body.classList.add('modo-game');
+    inicializarJuego();
+}
+
+function iniciarTutorial() {
+    document.body.classList.add('modo-tutorial');
+    document.body.classList.remove('modo-game');
+    tutorialPaso = 0;
+    tutorialEstado = [...TUTORIAL_ESTADO_INICIAL];
+    tutorialFichaSeleccionada = null;
+    renderTutorialBoard(tutorialEstado);
+    actualizarTodoTextosTutorial();
+    actualizarTextoTutorial(0);
+    actualizarDotsTutorial(0);
+    mostrarBotonesTutorial(0);
+    setTimeout(() => ejecutarDemoAuto(), 1500);
+}
+
+function ejecutarDemoAuto() {
+    if (tutorialPaso !== 0) return;
+    const els = getTutorialPosElements();
+    const pos0 = els[0], pos1 = els[1], pos2 = els[2];
+    if (!pos0 || !pos1 || !pos2) return;
+    setTimeout(() => {
+        pos0.classList.add('tutorial-ficha-mover');
+        const dx = pos2.getBoundingClientRect().left - pos0.getBoundingClientRect().left;
+        pos0.style.transform = `translateX(${dx}px)`;
+        setTimeout(() => {
+            pos0.classList.remove('tutorial-ficha-mover');
+            pos0.classList.remove('tutorial-ficha');
+            pos0.classList.add('tutorial-hueco');
+            pos0.style.transform = '';
+            pos2.classList.remove('tutorial-hueco');
+            pos2.classList.add('tutorial-ficha');
+            setTimeout(() => {
+                pos1.classList.add('tutorial-desaparecer');
+                setTimeout(() => {
+                    pos1.classList.remove('tutorial-ficha', 'tutorial-desaparecer');
+                    pos1.classList.add('tutorial-hueco');
+                    tutorialPaso = 1;
+                    tutorialEstado = [...TUTORIAL_ESTADO_INICIAL];
+                    renderTutorialBoard(tutorialEstado);
+                    setupTutorialInteraccion();
+                }, 600);
+            }, 500);
+        }, 800);
+    }, 1000);
+}
+
+function setupTutorialInteraccion() {
+    tutorialPaso = 1;
+    tutorialEstado = [...TUTORIAL_ESTADO_INICIAL];
+    renderTutorialBoard(tutorialEstado);
+    actualizarTextoTutorial(1);
+    actualizarDotsTutorial(1);
+    mostrarBotonesTutorial(1);
+    const els = getTutorialPosElements();
+    if (els[0]) els[0].classList.add('tutorial-pulse', 'tutorial-ficha-origen');
+    if (els[2]) els[2].classList.add('tutorial-destino-glow', 'tutorial-hueco-destino');
+    if (els[1]) els[1].classList.add('tutorial-atenuada', 'tutorial-ficha-intermedia');
+    els.forEach(el => el.replaceWith(el.cloneNode(true)));
+    const newPos = document.querySelectorAll('.tutorial-board .tutorial-pos');
+    newPos[0]?.addEventListener('click', () => onTutorialClic(0));
+    newPos[1]?.addEventListener('click', () => onTutorialClic(1));
+    newPos[2]?.addEventListener('click', () => onTutorialClic(2));
+}
+
+function onTutorialClic(idx) {
+    if (tutorialPaso !== 1) return;
+    if (tutorialFichaSeleccionada === null) {
+        if (tutorialEstado[idx] === 1 && TUTORIAL_CONEXIONES[idx]?.some(c => tutorialEstado[c.intermedia] === 1 && tutorialEstado[c.destino] === 0))
+            tutorialFichaSeleccionada = idx;
+        return;
+    }
+    const mov = TUTORIAL_CONEXIONES[tutorialFichaSeleccionada]?.find(c => c.destino === idx);
+    if (!mov || tutorialEstado[mov.intermedia] !== 1 || tutorialEstado[mov.destino] !== 0) return;
+    ejecutarTutorialMovimiento(tutorialFichaSeleccionada, mov.intermedia, mov.destino);
+}
+
+function ejecutarTutorialMovimiento(origen, intermedia, destino) {
+    const board = document.querySelector('.tutorial-board');
+    if (!board) return;
+    const posOrigen = board.querySelector(`.tutorial-pos[data-tpos="${origen}"]`);
+    const posInter = board.querySelector(`.tutorial-pos[data-tpos="${intermedia}"]`);
+    const posDest = board.querySelector(`.tutorial-pos[data-tpos="${destino}"]`);
+    if (!posOrigen || !posInter || !posDest) return;
+    posOrigen.classList.add('tutorial-ficha-mover');
+    const dx = posDest.getBoundingClientRect().left - posOrigen.getBoundingClientRect().left;
+    posOrigen.style.transform = `translateX(${dx}px)`;
+    tutorialEstado[origen] = 0;
+    tutorialEstado[intermedia] = 0;
+    tutorialEstado[destino] = 1;
+    setTimeout(() => {
+        posOrigen.classList.remove('tutorial-ficha', 'tutorial-ficha-mover');
+        posOrigen.classList.add('tutorial-hueco');
+        posOrigen.style.transform = '';
+        posDest.classList.remove('tutorial-hueco', 'tutorial-destino-glow');
+        posDest.classList.add('tutorial-ficha');
+        posInter.classList.add('tutorial-desaparecer');
+        setTimeout(() => {
+            posInter.classList.remove('tutorial-ficha', 'tutorial-desaparecer', 'tutorial-atenuada');
+            posInter.classList.add('tutorial-hueco');
+            tutorialFichaSeleccionada = null;
+            tutorialPaso = 2;
+            actualizarTextoTutorial(2);
+            actualizarDotsTutorial(2);
+            document.querySelectorAll('.tutorial-pos').forEach(el => el.classList.remove('tutorial-pulse', 'tutorial-destino-glow', 'tutorial-atenuada', 'tutorial-ficha-origen', 'tutorial-ficha-intermedia', 'tutorial-hueco-destino'));
+            setTimeout(() => {
+                tutorialPaso = 3;
+                actualizarTextoTutorial(3);
+                actualizarDotsTutorial(3);
+                mostrarBotonesTutorial(3);
+            }, 2000);
+        }, 600);
+    }, 800);
+}
+
 //  FUNCIÓN: INICIALIZAR JUEGO 
 // Resetea todo el estado y actualiza el DOM
 function inicializarJuego() {
@@ -184,7 +382,7 @@ function inicializarJuego() {
     // Actualizar los textos de las estadísticas
     actualizarEstadisticas();
 
-    // Onboarding: ocultar tooltip al reiniciar y mostrar si aplica
+    // Onboarding: ocultar tooltip al reiniciar (llamadas a startOnboarding eliminadas)
     const tooltip = document.getElementById('onboarding-tooltip');
     if (tooltip) {
         tooltip.classList.remove('is-visible', 'is-fadeout', 'is-hiding');
@@ -195,7 +393,6 @@ function inicializarJuego() {
             textEl.classList.remove('is-crossfade');
         }
     }
-    startOnboarding();
 
     console.log('Juego inicializado');
 }
@@ -342,11 +539,6 @@ function ejecutarMovimiento(origen, destino) {
     fichasRestantes--;
     actualizarEstadisticas();
 
-    // Onboarding: primer movimiento válido completado
-    if (onboardingActive && movimientos === 1) {
-        endOnboardingPhase1();
-    }
-
     // Verificar si el juego terminó
     verificarFinJuego();
 }
@@ -449,8 +641,8 @@ function iniciarTemporizador() {
 
 // Clic en cada posición del tablero
 elementosTablero.forEach((elemento, indice) => {
-    elemento.addEventListener('click', () => {
-        manejarClic(indice);
+        elemento.addEventListener('click', () => {
+        if (modoActual === 'game') manejarClic(indice);
     });
 });
 
@@ -459,7 +651,11 @@ btnReiniciar.addEventListener('click', inicializarJuego);
 btnDeshacer.addEventListener('click', deshacer);
 btnPista.addEventListener('click', mostrarPista);
 
-// INICIALIZACIÓN — Se ejecuta al cargar la página
-inicializarJuego();
+if (btnTutorialPlay) btnTutorialPlay.addEventListener('click', irAJuego);
+if (btnTutorialRepeat) btnTutorialRepeat.addEventListener('click', (e) => { e.preventDefault(); localStorage.removeItem(TUTORIAL_KEY); iniciarTutorial(); });
+if (btnTutorialSkip) btnTutorialSkip.addEventListener('click', irAJuego);
+
+// INICIALIZACIÓN — Tutorial primero
+iniciarTutorial();
 console.log('Peg Jump — JS cargado correctamente');
 

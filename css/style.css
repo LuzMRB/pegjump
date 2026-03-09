@@ -190,6 +190,7 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
     padding-top: max(clamp(14px, 2.2vh, 22px), env(safe-area-inset-top));
     padding-bottom: clamp(2px, 0.6vh, 8px);
 }
@@ -204,6 +205,8 @@ header {
 
 header .container {
     text-align: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Language toggle — pill style, top-right (pushed out) */
@@ -347,8 +350,118 @@ section#juego > p {
     display: none;
 }
 
+/* --- Visibilidad por modo (tutorial vs juego) --- */
+body.modo-tutorial #juego { display: none !important; }
+body.modo-tutorial #tutorial-wrap { display: flex !important; }
 
-/* 
+body.modo-game #tutorial-wrap { display: none !important; }
+body.modo-game #juego { display: flex !important; }
+
+body:not(.modo-game) #juego { display: none !important; }
+body:not(.modo-game) #tutorial-wrap { display: flex !important; }
+
+body.modo-tutorial .subtitulo { display: none; }
+
+/* Anular flex:1 y justify-content:center del section para que el tutorial quede arriba */
+body.modo-tutorial #tutorial-wrap {
+  flex: 0 0 auto !important;
+  justify-content: flex-start !important;
+}
+
+.tutorial-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 0;
+  margin-top: 0;
+  padding: 0;
+  padding-top: 0;
+}
+
+/* Tutorial — centrado vertical solo en main, header/footer intactos */
+body.modo-tutorial main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  padding-top: 0;
+  margin-top: 0;
+  flex-grow: 1;
+}
+
+.tutorial-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  margin-top: 0;
+  padding-top: 0;
+  gap: 2rem;
+}
+
+.tutorial-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.55);
+  letter-spacing: 0.03em;
+  margin: 0 0 1rem 0;
+}
+.tutorial-board { display: flex; gap: 2rem; align-items: center; padding: 2.5rem 3.5rem; background: rgba(255, 255, 255, 0.4); border-radius: 24px; backdrop-filter: blur(8px); }
+.tutorial-steps-indicator { display: flex; gap: 0.6rem; justify-content: center; margin: 0.5rem 0; }
+.tutorial-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(0, 0, 0, 0.12); transition: all 0.4s ease; }
+.tutorial-dot.active { background: rgba(0, 0, 0, 0.35); transform: scale(1.3); }
+.tutorial-pos { width: 100px; height: 100px; border-radius: 50%; flex-shrink: 0; }
+.tutorial-pos.tutorial-ficha {
+  background: radial-gradient(circle at 30% 24%, var(--ui-peg-light) 0%, var(--ui-peg-mid) 56%, var(--ui-peg-dark) 100%);
+  border: 1px solid rgba(188, 196, 208, 0.95);
+  box-shadow:
+    0 10px 16px rgba(16, 24, 40, 0.12),
+    0 2px 4px rgba(16, 24, 40, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+.tutorial-pos.tutorial-hueco { background: radial-gradient(circle at 45% 35%, var(--ui-hole-edge) 0%, #c2c9d1 42%, var(--ui-hole-core) 100%); border: 1px dashed rgba(148, 163, 184, 0.5); }
+.tutorial-pos.tutorial-ficha.tutorial-pulse, .tutorial-pos.tutorial-ficha.tutorial-ficha-origen { animation: tutorial-pulse 1.8s ease-in-out infinite; }
+.tutorial-pos.tutorial-hueco.tutorial-destino-glow,
+.tutorial-pos.tutorial-hueco.tutorial-hueco-destino {
+  background: transparent;
+  border: 2px dashed rgba(26, 94, 68, 0.4);
+  animation: tutorial-destino-glow 1.8s ease-in-out infinite;
+}
+.tutorial-pos.tutorial-ficha.tutorial-atenuada,
+.tutorial-pos.tutorial-ficha.tutorial-ficha-intermedia { opacity: 0.5; }
+.tutorial-pos.tutorial-ficha.tutorial-desaparecer { transition: opacity 0.6s ease, transform 0.6s ease; opacity: 0; transform: scale(0.5); }
+.tutorial-ficha-mover { transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 24px 8px rgba(26, 94, 68, 0.5); animation: tutorial-ficha-glow-mover 0.8s ease-in-out infinite alternate; }
+@keyframes tutorial-pulse { 0%, 100% { box-shadow: 0 10px 16px rgba(16, 24, 40, 0.12), 0 2px 4px rgba(16, 24, 40, 0.08), 0 0 0 0 rgba(26, 94, 68, 0.4); } 50% { box-shadow: 0 10px 16px rgba(16, 24, 40, 0.12), 0 2px 4px rgba(16, 24, 40, 0.08), 0 0 0 14px rgba(26, 94, 68, 0); } }
+@keyframes tutorial-destino-glow { 0%, 100% { border-color: rgba(26, 94, 68, 0.35); } 50% { border-color: rgba(26, 94, 68, 0.75); } }
+@keyframes tutorial-ficha-glow-mover { 0% { box-shadow: 0 0 20px 6px rgba(26, 94, 68, 0.45); } 100% { box-shadow: 0 0 28px 12px rgba(26, 94, 68, 0.55); } }
+.tutorial-text {
+  color: rgba(0, 0, 0, 0.75);
+  font-size: 1.3rem;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.5;
+  min-height: 2rem;
+  transition: opacity 0.4s ease;
+}
+.tutorial-actions { display: flex; flex-direction: column; align-items: center; gap: var(--espaciado-md); }
+.tutorial-btn-play { background: linear-gradient(135deg, #a8d8ea, #7ec8c8); color: white; border: none; padding: 0.9rem 2.5rem; border-radius: 16px; font-size: 1.1rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 20px rgba(126, 200, 200, 0.3); }
+.tutorial-btn-play:hover { transform: translateY(-2px); }
+.tutorial-btn-skip { background: none; border: none; color: rgba(0, 0, 0, 0.3); font-size: 0.85rem; cursor: pointer; padding: 0.5rem 1rem; }
+.tutorial-btn-repeat { background: none; border: none; color: rgba(0, 0, 0, 0.25); font-size: 0.8rem; cursor: pointer; padding: 0.4rem 0.8rem; text-decoration: none; }
+.tutorial-btn-repeat:hover { color: rgba(0, 0, 0, 0.45); }
+
+@media (max-width: 480px) {
+  .tutorial-content { padding: 1.5rem 1rem; gap: 1.5rem; }
+  .tutorial-board { gap: 1rem; padding: 1.5rem 2rem; }
+  .tutorial-pos { width: 56px; height: 56px; }
+  .tutorial-title { font-size: 1.1rem; }
+  .tutorial-text { font-size: 1rem; }
+}
+
+/*
    5. TABLERO DE JUEGO (Flexbox — UD6 §3)
 */
 
