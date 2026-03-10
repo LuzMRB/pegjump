@@ -699,18 +699,8 @@ document.querySelectorAll('[data-lang]').forEach(btn => {
     });
 });
 
-// INICIALIZACIÓN — Tutorial o juego según localStorage
-const params = new URLSearchParams(window.location.search);
-const forzarTutorial = params.get('tutorial') === '1';
-
-if (!tutorialCompletado() || forzarTutorial) {
-    iniciarTutorial();
-} else {
-    modoActual = 'game';
-    document.body.classList.remove('modo-tutorial');
-    document.body.classList.add('modo-game');
-    inicializarJuego();
-}
+// INICIALIZACIÓN — Siempre mostrar tutorial al cargar
+iniciarTutorial();
 
 console.log('Peg Jump — JS cargado correctamente');
 
