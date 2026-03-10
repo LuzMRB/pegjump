@@ -195,8 +195,6 @@ function inicializarJuego() {
             textEl.classList.remove('is-crossfade');
         }
     }
-    startOnboarding();
-
     console.log('Juego inicializado');
 }
 
@@ -342,11 +340,6 @@ function ejecutarMovimiento(origen, destino) {
     fichasRestantes--;
     actualizarEstadisticas();
 
-    // Onboarding: primer movimiento válido completado
-    if (onboardingActive && movimientos === 1) {
-        endOnboardingPhase1();
-    }
-
     // Verificar si el juego terminó
     verificarFinJuego();
 }
@@ -447,10 +440,10 @@ function iniciarTemporizador() {
 // EVENT LISTENERS: Conectar HTML con JavaScript
 
 
-// Clic en cada posición del tablero
+// Clic en cada posición del tablero (solo en modo juego)
 elementosTablero.forEach((elemento, indice) => {
     elemento.addEventListener('click', () => {
-        manejarClic(indice);
+        if (modoActual === 'game') manejarClic(indice);
     });
 });
 
@@ -459,7 +452,255 @@ btnReiniciar.addEventListener('click', inicializarJuego);
 btnDeshacer.addEventListener('click', deshacer);
 btnPista.addEventListener('click', mostrarPista);
 
-// INICIALIZACIÓN — Se ejecuta al cargar la página
-inicializarJuego();
+
+/* ===================== TUTORIAL ===================== */
+
+let modoActual = 'tutorial';
+let tutorialPaso = 0;
+
+const TUTORIAL_TEXTOS = {
+    es: {
+        tutorial_title: "Cómo jugar",
+        tutorial_step_0: "Una ficha salta sobre otra",
+        tutorial_step_1: "Tu turno — toca la ficha",
+        tutorial_step_2: "La ficha saltada desaparece",
+        tutorial_step_3: "Objetivo: deja solo una ficha",
+        tutorial_play: "Jugar",
+        tutorial_skip: "Saltar",
+        tutorial_repeat: "Repetir tutorial"
+    },
+    en: {
+        tutorial_title: "How to play",
+        tutorial_step_0: "A peg jumps over another",
+        tutorial_step_1: "Your turn — tap the peg",
+        tutorial_step_2: "The jumped peg disappears",
+        tutorial_step_3: "Goal: leave only one peg",
+        tutorial_play: "Play",
+        tutorial_skip: "Skip",
+        tutorial_repeat: "Replay tutorial"
+    }
+};
+
+function obtenerIdiomaActual() {
+    if (window.i18n && typeof window.i18n.getLang === 'function') return window.i18n.getLang();
+    const btnEN = document.querySelector('[data-lang="en"]');
+    if (btnEN && btnEN.classList.contains('active')) return 'en';
+    if (document.documentElement.lang === 'en') return 'en';
+    const stored = localStorage.getItem('pegjump-lang');
+    if (stored === 'es' || stored === 'en') return stored;
+    return 'es';
+}
+
+function textoTutorial(clave) {
+    const lang = obtenerIdiomaActual();
+    return TUTORIAL_TEXTOS[lang]?.[clave] || TUTORIAL_TEXTOS['es'][clave] || clave;
+}
+
+function actualizarTextoTutorial(paso) {
+    const el = document.querySelector('.tutorial-text');
+    if (!el) return;
+    el.classList.add('fade-out');
+    setTimeout(() => {
+        el.textContent = textoTutorial('tutorial_step_' + paso);
+        el.classList.remove('fade-out');
+    }, 400);
+}
+
+function actualizarTodoTextosTutorial() {
+    const titulo = document.querySelector('.tutorial-title');
+    if (titulo) titulo.textContent = textoTutorial('tutorial_title');
+    const btnPlay = document.querySelector('.tutorial-btn-play');
+    if (btnPlay) btnPlay.textContent = textoTutorial('tutorial_play');
+    const btnSkip = document.querySelector('.tutorial-btn-skip');
+    if (btnSkip) btnSkip.textContent = textoTutorial('tutorial_skip');
+    const btnRepeat = document.querySelector('.tutorial-btn-repeat');
+    if (btnRepeat) btnRepeat.textContent = textoTutorial('tutorial_repeat');
+}
+
+function actualizarDots(paso) {
+    document.querySelectorAll('.tutorial-dot').forEach(dot => {
+        dot.classList.toggle('active', parseInt(dot.dataset.step) === paso);
+    });
+}
+
+const TUTORIAL_KEY = 'pegjump_tutorial_completado';
+
+function tutorialCompletado() {
+    return localStorage.getItem(TUTORIAL_KEY) === 'true';
+}
+
+function marcarTutorialCompletado() {
+    localStorage.setItem(TUTORIAL_KEY, 'true');
+}
+
+function resetearTutorial() {
+    localStorage.removeItem(TUTORIAL_KEY);
+}
+
+window.actualizarTodoTextosTutorial = actualizarTodoTextosTutorial;
+window.actualizarTextoTutorial = actualizarTextoTutorial;
+window.getTutorialPaso = () => tutorialPaso;
+
+function renderTutorialBoard(estado) {
+    const posiciones = document.querySelectorAll('.tutorial-pos');
+    posiciones.forEach((pos, i) => {
+        pos.className = 'tutorial-pos';
+        if (estado[i] === 1) {
+            pos.classList.add('tutorial-ficha');
+        } else {
+            pos.classList.add('tutorial-hueco-destino');
+        }
+    });
+}
+
+function animarSaltoTutorial(callback) {
+    const posiciones = document.querySelectorAll('.tutorial-pos');
+    const fichaA = posiciones[0];
+    const fichaB = posiciones[1];
+    const huecoC = posiciones[2];
+
+    const rectA = fichaA.getBoundingClientRect();
+    const rectC = huecoC.getBoundingClientRect();
+    const distX = rectC.left - rectA.left;
+
+    fichaA.classList.add('tutorial-ficha-mover');
+    fichaA.style.transform = `translateX(${distX}px)`;
+
+    setTimeout(() => {
+        fichaB.classList.add('tutorial-ficha-desaparecer');
+    }, 500);
+
+    setTimeout(() => {
+        fichaA.style.transform = '';
+        fichaA.classList.remove('tutorial-ficha-mover');
+        renderTutorialBoard([0, 0, 1]);
+        if (callback) callback();
+    }, 1400);
+}
+
+function aplicarClasesPaso(paso) {
+    const posiciones = document.querySelectorAll('.tutorial-pos');
+    posiciones.forEach(pos => {
+        pos.classList.remove('tutorial-ficha-origen', 'tutorial-ficha-intermedia', 'tutorial-hueco-destino');
+    });
+
+    if (paso === 0 || paso === 1) {
+        renderTutorialBoard([1, 1, 0]);
+        posiciones[0].classList.add('tutorial-ficha-origen');
+        posiciones[1].classList.add('tutorial-ficha-intermedia');
+        posiciones[2].classList.add('tutorial-hueco-destino');
+    }
+}
+
+function iniciarTutorial() {
+    modoActual = 'tutorial';
+    tutorialPaso = 0;
+    document.body.classList.remove('modo-game');
+    document.body.classList.add('modo-tutorial');
+    actualizarTodoTextosTutorial();
+    ejecutarPasoTutorial(0);
+}
+
+function ejecutarPasoTutorial(paso) {
+    tutorialPaso = paso;
+    actualizarDots(paso);
+
+    const btnPlay = document.querySelector('.tutorial-btn-play');
+    const btnSkip = document.querySelector('.tutorial-btn-skip');
+    const btnRepeat = document.querySelector('.tutorial-btn-repeat');
+
+    switch (paso) {
+        case 0:
+            aplicarClasesPaso(0);
+            actualizarTextoTutorial(0);
+            if (btnPlay) btnPlay.style.display = 'none';
+            if (btnSkip) btnSkip.style.display = '';
+            if (btnRepeat) btnRepeat.style.display = 'none';
+            setTimeout(() => {
+                animarSaltoTutorial(() => {
+                    setTimeout(() => ejecutarPasoTutorial(1), 1500);
+                });
+            }, 1500);
+            break;
+
+        case 1:
+            aplicarClasesPaso(1);
+            actualizarTextoTutorial(1);
+            if (btnPlay) btnPlay.style.display = 'none';
+            if (btnSkip) btnSkip.style.display = '';
+            if (btnRepeat) btnRepeat.style.display = 'none';
+            activarClicsTutorial();
+            break;
+
+        case 2:
+            actualizarTextoTutorial(2);
+            actualizarDots(2);
+            if (btnPlay) btnPlay.style.display = 'none';
+            if (btnSkip) btnSkip.style.display = '';
+            if (btnRepeat) btnRepeat.style.display = 'none';
+            setTimeout(() => ejecutarPasoTutorial(3), 2000);
+            break;
+
+        case 3:
+            actualizarTextoTutorial(3);
+            actualizarDots(3);
+            if (btnPlay) btnPlay.style.display = '';
+            if (btnSkip) btnSkip.style.display = 'none';
+            if (btnRepeat) btnRepeat.style.display = '';
+            break;
+    }
+}
+
+function activarClicsTutorial() {
+    const posiciones = document.querySelectorAll('.tutorial-pos');
+    const handler = (e) => {
+        const tpos = parseInt(e.currentTarget.dataset.tpos);
+        if (tpos === 0) {
+            posiciones.forEach(p => p.removeEventListener('click', handler));
+            animarSaltoTutorial(() => {
+                ejecutarPasoTutorial(2);
+            });
+        }
+    };
+    posiciones.forEach(pos => {
+        pos.addEventListener('click', handler);
+    });
+}
+
+function finalizarTutorial() {
+    marcarTutorialCompletado();
+    modoActual = 'game';
+    document.body.classList.remove('modo-tutorial');
+    document.body.classList.add('modo-game');
+    inicializarJuego();
+}
+
+// Tutorial: botones
+const btnTutorialPlay = document.querySelector('.tutorial-btn-play');
+const btnTutorialSkip = document.querySelector('.tutorial-btn-skip');
+const btnTutorialRepeat = document.querySelector('.tutorial-btn-repeat');
+
+if (btnTutorialPlay) btnTutorialPlay.addEventListener('click', finalizarTutorial);
+if (btnTutorialSkip) btnTutorialSkip.addEventListener('click', finalizarTutorial);
+if (btnTutorialRepeat) btnTutorialRepeat.addEventListener('click', () => {
+    resetearTutorial();
+    iniciarTutorial();
+});
+
+// Cambio de idioma: actualizar textos del tutorial
+document.querySelectorAll('[data-lang]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        setTimeout(() => {
+            if (document.body.classList.contains('modo-tutorial')) {
+                actualizarTodoTextosTutorial();
+                actualizarTextoTutorial(tutorialPaso);
+            }
+        }, 100);
+    });
+});
+
+// INICIALIZACIÓN — Siempre mostrar tutorial al cargar
+iniciarTutorial();
+
 console.log('Peg Jump — JS cargado correctamente');
 
