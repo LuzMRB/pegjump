@@ -147,6 +147,8 @@ const btnPista = document.getElementById('btn-pista');
 //  FUNCIÓN: INICIALIZAR JUEGO 
 // Resetea todo el estado y actualiza el DOM
 function inicializarJuego() {
+    if (typeof limpiarSeleccion === 'function') limpiarSeleccion();
+
     // Resetear variables
     tablero = [
         false,
@@ -249,48 +251,58 @@ function obtenerMovimientosValidos(posicion) {
     return movimientosValidos;
 }
 
+function limpiarSeleccion() {
+    elementosTablero.forEach(pos => {
+        pos.classList.remove('seleccionada', 'movimiento-valido', 'no-movimiento');
+    });
+    document.getElementById('tablero')?.classList.remove('tiene-seleccion');
+    fichaSeleccionada = null;
+}
+
+function seleccionarFicha(posicion) {
+    limpiarSeleccion();
+
+    const validos = obtenerMovimientosValidos(posicion);
+
+    if (validos.length === 0) {
+        elementosTablero[posicion].classList.add('no-movimiento');
+        setTimeout(() => elementosTablero[posicion].classList.remove('no-movimiento'), 300);
+        return;
+    }
+
+    fichaSeleccionada = posicion;
+    elementosTablero[posicion].classList.add('seleccionada');
+    document.getElementById('tablero')?.classList.add('tiene-seleccion');
+
+    validos.forEach(mov => {
+        const destino = mov[1];
+        elementosTablero[destino].classList.add('movimiento-valido');
+    });
+
+    if (!juegoActivo) {
+        juegoActivo = true;
+        iniciarTemporizador();
+    }
+}
+
 //  FUNCIÓN: MANEJAR CLIC EN UNA POSICIÓN DEL TABLERO 
 function manejarClic(posicion) {
-    // Si no hay ficha seleccionada todavía...
-    if (fichaSeleccionada === null) {
-        // Solo se puede seleccionar una posición con ficha
-        if (tablero[posicion]) {
-            // Verificar que tiene al menos un movimiento válido
-            const validos = obtenerMovimientosValidos(posicion);
-            if (validos.length > 0) {
-                fichaSeleccionada = posicion;
-                elementosTablero[posicion].classList.add('seleccionada');
+    if (fichaSeleccionada !== null && !tablero[posicion] && elementosTablero[posicion].classList.contains('movimiento-valido')) {
+        ejecutarMovimiento(fichaSeleccionada, posicion);
+        limpiarSeleccion();
+        return;
+    }
 
-                // Iniciar temporizador en el primer clic
-                if (!juegoActivo) {
-                    juegoActivo = true;
-                    iniciarTemporizador();
-                }
-            }
-        }
-    } else {
-        // Ya hay una ficha seleccionada...
-
-        // Si hace clic en la misma ficha → deseleccionar
-        if (posicion === fichaSeleccionada) {
-            elementosTablero[posicion].classList.remove('seleccionada');
-            fichaSeleccionada = null;
-            return; // Salir de la función
-        }
-
-        // Si hace clic en otra ficha → cambiar selección
-        if (tablero[posicion]) {
-            elementosTablero[fichaSeleccionada].classList.remove('seleccionada');
-            fichaSeleccionada = posicion;
-            elementosTablero[posicion].classList.add('seleccionada');
+    if (tablero[posicion]) {
+        if (fichaSeleccionada === posicion) {
+            limpiarSeleccion();
             return;
         }
-
-        // Si hace clic en un hueco vacío → intentar mover
-        if (!tablero[posicion]) {
-            ejecutarMovimiento(fichaSeleccionada, posicion);
-        }
+        seleccionarFicha(posicion);
+        return;
     }
+
+    limpiarSeleccion();
 }
 
 //  FUNCIÓN: EJECUTAR UN MOVIMIENTO 
@@ -383,9 +395,10 @@ function verificarFinJuego() {
 
 // FUNCIÓN: DESHACER ÚLTIMO MOVIMIENTO 
 function deshacer() {
-    // pop() saca el último elemento del array (UD3: arrays)
+    limpiarSeleccion();
+
     if (historialMovimientos.length === 0) {
-        return; // No hay nada que deshacer
+        return;
     }
 
     const ultimo = historialMovimientos.pop();
