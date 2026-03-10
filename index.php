@@ -48,7 +48,7 @@
     <!-- MAIN -->
     <main>
 
-        <!-- Tutorial inicial -->
+        <!-- Tutorial inicial — mini tablero 3 posiciones -->
         <section id="tutorial-wrap" class="tutorial-wrap" aria-hidden="true">
             <div class="tutorial-content">
                 <h2 class="tutorial-title">Cómo jugar</h2>
