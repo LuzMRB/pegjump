@@ -48,6 +48,30 @@
     <!-- MAIN -->
     <main>
 
+        <!-- Tutorial inicial — mini tablero 3 posiciones -->
+        <section id="tutorial-wrap" class="tutorial-wrap" aria-hidden="true">
+            <div class="tutorial-content">
+                <h2 class="tutorial-title" data-i18n="tutorial_title">Cómo jugar</h2>
+                <div class="tutorial-board">
+                    <div class="tutorial-pos tutorial-ficha" data-tpos="0"></div>
+                    <div class="tutorial-pos tutorial-ficha" data-tpos="1"></div>
+                    <div class="tutorial-pos tutorial-hueco" data-tpos="2"></div>
+                </div>
+                <div class="tutorial-steps-indicator" id="tutorial-steps-indicator">
+                    <span class="tutorial-dot active" data-step="0"></span>
+                    <span class="tutorial-dot" data-step="1"></span>
+                    <span class="tutorial-dot" data-step="2"></span>
+                    <span class="tutorial-dot" data-step="3"></span>
+                </div>
+                <p class="tutorial-text" id="tutorial-text"></p>
+                <div class="tutorial-actions">
+                    <button type="button" class="tutorial-btn-play" id="btn-tutorial-play" data-i18n="tutorial_play">Jugar</button>
+                    <a href="#" class="tutorial-btn-repeat" id="btn-tutorial-repeat" data-i18n="tutorial_repeat">Repetir tutorial</a>
+                    <button type="button" class="tutorial-btn-skip" id="btn-tutorial-skip" data-i18n="tutorial_skip">Saltar</button>
+                </div>
+            </div>
+        </section>
+
         <!-- SECCIÓN 1: El Juego -->
         <section id="juego">
             <h2 data-i18n="sectionTitle">Empieza a resolver</h2>
