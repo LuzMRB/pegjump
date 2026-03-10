@@ -48,6 +48,30 @@
     <!-- MAIN -->
     <main>
 
+        <!-- Tutorial inicial — mini tablero 3 posiciones -->
+        <section id="tutorial-wrap" style="display: none;">
+            <div class="tutorial-content">
+                <h2 class="tutorial-title"></h2>
+                <div class="tutorial-board">
+                    <div class="tutorial-pos" data-tpos="0"></div>
+                    <div class="tutorial-pos" data-tpos="1"></div>
+                    <div class="tutorial-pos" data-tpos="2"></div>
+                </div>
+                <div class="tutorial-steps-indicator">
+                    <span class="tutorial-dot active" data-step="0"></span>
+                    <span class="tutorial-dot" data-step="1"></span>
+                    <span class="tutorial-dot" data-step="2"></span>
+                    <span class="tutorial-dot" data-step="3"></span>
+                </div>
+                <p class="tutorial-text"></p>
+                <div class="tutorial-actions">
+                    <button class="tutorial-btn-play" style="display: none;"></button>
+                    <button class="tutorial-btn-skip"></button>
+                    <button class="tutorial-btn-repeat" style="display: none;"></button>
+                </div>
+            </div>
+        </section>
+
         <!-- SECCIÓN 1: El Juego -->
         <section id="juego">
             <h2 data-i18n="sectionTitle">Empieza a resolver</h2>
